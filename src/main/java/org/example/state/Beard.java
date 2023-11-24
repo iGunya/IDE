@@ -1,39 +1,42 @@
 package org.example.state;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.example.Utils;
 import org.example.state.params.BeardSector;
 import org.example.state.params.HairColor;
-import org.example.state.params.HeadSector;
+import org.example.state.params.HairLong;
 import org.example.state.params.Styling;
 
 import java.util.List;
 
+import static org.example.state.params.TypeHaircut.HEAD;
+
 public class Beard {
 
-    public final Pair<BeardSector, Integer> cheeks;
-    public final Pair<BeardSector, Integer> chin;
-    public final Pair<BeardSector, Integer> mustache;
+    public HairLong cheeks;
+    public HairLong chin;
+    public HairLong mustache;
     public HairColor color;
     public List<Styling> stylings;
 
     public Beard( int cheeks, int chin, int mustache ) {
-        this.cheeks = Pair.of( BeardSector.CHEEKS, cheeks );
-        this.chin = Pair.of( BeardSector.CHIN, chin );
-        this.mustache = Pair.of( BeardSector.MUSTACHE, mustache );
+        this.cheeks = Utils.getLong( HEAD, cheeks );
+        this.chin = Utils.getLong( HEAD, chin );
+        this.mustache = Utils.getLong( HEAD, mustache );
     }
 
-    public void setSector( BeardSector sector, int size ) {
+    public void setSector( BeardSector sector, HairLong size ) {
         switch ( sector ) {
             case CHEEKS: {
-                cheeks.setValue( size );
+                cheeks = size;
                 break;
             }
             case CHIN: {
-                chin.setValue( size );
+                chin = size;
                 break;
             }
             default: {
-                mustache.setValue( size );
+                mustache = size;
                 break;
             }
         }

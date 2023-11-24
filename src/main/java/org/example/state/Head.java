@@ -1,38 +1,39 @@
 package org.example.state;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.example.state.params.HairColor;
-import org.example.state.params.HeadSector;
-import org.example.state.params.Styling;
+import org.example.Utils;
+import org.example.state.params.*;
 
 import java.util.List;
 
+import static org.example.state.params.TypeHaircut.*;
+
 public class Head {
 
-    public final Pair<HeadSector, Integer> whisky;
-    public final Pair<HeadSector, Integer> back;
-    public final Pair<HeadSector, Integer> top;
+    public HairLong whisky;
+    public HairLong back;
+    public HairLong top;
     public HairColor color;
     public List<Styling> stylings;
 
     public Head( int whisky, int back, int top ) {
-        this.whisky = Pair.of( HeadSector.WHISKY, whisky );
-        this.back = Pair.of( HeadSector.BACK, back );
-        this.top = Pair.of( HeadSector.TOP, top );
+        this.whisky = Utils.getLong( HEAD, whisky );
+        this.back = Utils.getLong( HEAD, back );
+        this.top = Utils.getLong( HEAD, top );
     }
 
-    public void setSector( HeadSector sector, int size ) {
+    public void setSector( HeadSector sector, HairLong size ) {
         switch ( sector ) {
             case TOP: {
-                top.setValue( size );
+                top = size;
                 break;
             }
             case BACK: {
-                back.setValue( size );
+                back = size;
                 break;
             }
             default: {
-                whisky.setValue( size );
+                whisky = size;
                 break;
             }
         }
