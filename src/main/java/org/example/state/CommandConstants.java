@@ -4,16 +4,16 @@ public enum CommandConstants {
 
     CHOSE_HAIRCUT( "Клиент выбрал стрижку %s" ),
     FOR( "Для %s:" ),
-    CURRENT_LONG( "Текущая длинна %s %i милимметров(а)" ),
-    DESIRED_LONG( "Желаемая длинна %s %i <числовое значение> миллиметров" ),
-    HAIR_COLOR( "Цвет волос %s" ),
-    HAIR_STYLING( "Укладка включает %s" ),
+    CURRENT_LONG( "\t● Текущая длинна %s милимметров(а)" ),
+    DESIRED_LONG( "\t● Желаемая длинна %s <числовое значение> миллиметров" ),
+    HAIR_COLOR( "\t● Цвет волос %s" ),
+    HAIR_STYLING( "\t● Укладка включает %s" ),
     SATISFIED( "Опрос все ли устраивает" ),
     HAIRCUT( "Стрижка %s:" ),
-    WASHING_HAIR( "Моем волосы" ),
-    HAIRCUT_SECTOR( "Стрижка %s:" ),
-    STYLING_PROCESS( "Укладываем волосы" ),
-    DRYING_HAIR( "Сушим волосы" );
+    WASHING_HAIR( "\t● Моем волосы" ),
+    HAIRCUT_SECTOR( "\t● Стрижем %s" ),
+    STYLING_PROCESS( "\t● Укладываем волосы" ),
+    DRYING_HAIR( "\t● Сушим волосы" );
 
     public String stingCommand;
 

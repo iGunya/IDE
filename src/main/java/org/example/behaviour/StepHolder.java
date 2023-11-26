@@ -3,11 +3,12 @@ package org.example.behaviour;
 import com.google.common.collect.ImmutableList;
 import org.example.state.Step;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StepHolder {
 
-    private List<Step> steps;
+    private List<Step> steps = new ArrayList<>();
 
     public void addStep( Step step ) {
         steps.add( step );

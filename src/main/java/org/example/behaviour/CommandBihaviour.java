@@ -1,8 +1,10 @@
 package org.example.behaviour;
 
 import com.google.common.collect.ImmutableList;
+import javafx.scene.layout.HBox;
 import org.apache.commons.lang3.Validate;
 import org.example.Utils;
+import org.example.di.Containers;
 import org.example.state.*;
 import org.example.state.params.*;
 
@@ -17,89 +19,72 @@ import static org.example.state.params.TypeHaircut.*;
 
 public class CommandBihaviour {
 
-    private final StepHolder stepHolder = new StepHolder();
-    private final HaircutDesiredState stateDisired = new HaircutDesiredState();
-    private final HaircutBeforeState stateBefore = new HaircutBeforeState();
+    private final StepHolder stepHolder = Containers.getStepHolder();
+    private final HaircutDesiredState stateDisired = Containers.getStateDisired();
+    private final HaircutBeforeState stateBefore = Containers.getStateBefore();
 
     public void choseHaircut( List<TypeHaircut> haircuts ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.CHOSE_HAIRCUT );
-        command.params = haircuts.stream().map( TypeHaircut::toString ).collect( Collectors.toList() );
+        command.params = haircuts.stream().map( e -> e.aliases.get( 0 ) ).collect( Collectors.joining(" и ") );
         step.command = command;
         stepHolder.addStep( step );
-        stateDisired.strings = haircuts;
+        stateDisired.haircuts = haircuts;
     }
 
     public void forHaircut( TypeHaircut haircut ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.FOR );
-        command.params = ImmutableList.of( haircut.toString() );
+        command.params = haircut.aliases.get( 0 ) ;
         step.command = command;
         stepHolder.addStep( step );
     }
 
-    public void currentLong( TypeHaircut haircut, int x, int y, int z ) {
+    public void currentLongHead( HeadSector sector, int x ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.CURRENT_LONG );
-        command.params = ImmutableList.of( haircut.toString(), String.valueOf( x ),
-                String.valueOf( y ), String.valueOf( z ) );
+        command.params =  sector.aliases.get( 1 ) + " " + x;
         step.command = command;
         stepHolder.addStep( step );
-        switch ( haircut ) {
-            case HEAD: {
-                stateBefore.sectorSize.put( WHISKY.name(), x );
-                stateBefore.sectorSize.put( BACK.name(), y );
-                stateBefore.sectorSize.put( TOP.name(), z );
-            }
-            default: {
-                stateBefore.sectorSize.put( CHIN.name(), x );
-                stateBefore.sectorSize.put( CHEEKS.name(), y );
-                stateBefore.sectorSize.put( MUSTACHE.name(), z );
-            }
-
-        }
+        stateBefore.sectorSize.put( sector.name(), x);
     }
 
-    public void desiredLong( TypeHaircut haircut, int x, int y, int z  ) {
+    public void currentLongBeard( BeardSector sector, int x) {
         Step step = new Step();
-        Command command = new Command( CommandConstants.DESIRED_LONG );
-        command.params = ImmutableList.of( haircut.toString(), String.valueOf( x ),
-                String.valueOf( y ), String.valueOf( z ) );
+        Command command = new Command( CommandConstants.CURRENT_LONG );
+        command.params =  sector.aliases.get( 1 ) + " " + x;
         step.command = command;
-        validateDisiredLessThenCurrent( haircut, x, y, z );
+        stepHolder.addStep( step );
+        stateBefore.sectorSize.put( sector.name(), x);
+    }
+
+    public void desiredLong( TypeHaircut haircut, String sectorSting, int x  ) {
+
+        Step step = new Step();
         switch ( haircut ) {
             case HEAD: {
-                step.head = new Head( x, y, z );
+                HeadSector sector = HeadSector.sectorFrom( sectorSting );
+                validateDisiredLessThenCurrent( sector, x);
+                step.head.setSector( sector, x );
                 stateDisired.sectorSize.put( WHISKY.name(), Utils.getLong( HEAD, x ) );
-                stateDisired.sectorSize.put( BACK.name(), Utils.getLong( HEAD, y ) );
-                stateDisired.sectorSize.put( TOP.name(), Utils.getLong( HEAD, z ) );
             }
             default: {
-                step.beard = new Beard( x, y, z );
+                BeardSector sector = BeardSector.sectorFrom( sectorSting );
+                validateDisiredLessThenCurrent( sector, x);
+                step.beard.setSector( sector, x );
                 stateDisired.sectorSize.put( CHIN.name(), Utils.getLong( BRARD, x ) );
-                stateDisired.sectorSize.put( CHEEKS.name(), Utils.getLong( BRARD, y ) );
-                stateDisired.sectorSize.put( MUSTACHE.name(), Utils.getLong( BRARD, z ) );
             }
 
         }
+        Command command = new Command( CommandConstants.DESIRED_LONG );
+        command.params =  sectorSting + " " + x;
+        step.command = command;
         stepHolder.addStep( step );
     }
 
-    private void validateDisiredLessThenCurrent( TypeHaircut haircut, int x, int y, int z ) {
+    private void validateDisiredLessThenCurrent( Enum<?> sector, int x ) {
         Map<String, Integer> sectorSize = stateBefore.sectorSize;
-        switch ( haircut ) {
-            case HEAD: {
-                assertDisiredLessThenCurrent( sectorSize.get( WHISKY.name() ) > x );
-                assertDisiredLessThenCurrent( sectorSize.get( BACK.name() ) > y );
-                assertDisiredLessThenCurrent( sectorSize.get( TOP.name() ) > z );
-            }
-            default: {
-                assertDisiredLessThenCurrent( sectorSize.get( CHIN.name() ) > x );
-                assertDisiredLessThenCurrent( sectorSize.get( CHEEKS.name() ) > y );
-                assertDisiredLessThenCurrent( sectorSize.get( MUSTACHE.name() ) > z );
-            }
-
-        }
+        assertDisiredLessThenCurrent( sectorSize.get( sector.name() ) > x );
     }
 
     private void assertDisiredLessThenCurrent( boolean isLess ) {
@@ -110,7 +95,7 @@ public class CommandBihaviour {
     public void hairColor( TypeHaircut haircut, HairColor color ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.HAIR_COLOR );
-        command.params = ImmutableList.of( color.toString() );
+        command.params = color.toString();
         step.command = command;
         switch ( haircut ) {
             case HEAD: {
@@ -135,7 +120,7 @@ public class CommandBihaviour {
     public void hairStyling( List<Styling> styling ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.HAIR_STYLING );
-        command.params = styling.stream().map( Styling::toString ).collect( Collectors.toList() );
+        command.params = styling.stream().map( Styling::toString ).collect( Collectors.joining( ", " ) );
         step.command = command;
         stateDisired.setStylings( styling );
         copyPrevState( step );
@@ -152,16 +137,16 @@ public class CommandBihaviour {
     public void haircut( TypeHaircut typeHaircut ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.HAIRCUT );
-        command.params = ImmutableList.of( typeHaircut.toString() );
+        command.params = typeHaircut.toString();
         step.command = command;
         copyPrevState( step );
         stepHolder.addStep( step );
     }
 
-    public void washingHair( TypeHaircut typeHaircut ) {
+    public void washingHair() {
         Step step = new Step();
         Command command = new Command( CommandConstants.WASHING_HAIR );
-        command.params = ImmutableList.of( typeHaircut.toString() );
+        command.params = "";
         step.command = command;
         copyPrevState( step );
         stepHolder.addStep( step );
@@ -170,7 +155,7 @@ public class CommandBihaviour {
     public void haircutSector( TypeHaircut typeHaircut, String sector ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.HAIRCUT_SECTOR );
-        command.params = ImmutableList.of( sector );
+        command.params =  sector;
         step.command = command;
         copyPrevState( step );
         if ( typeHaircut == HEAD ) {

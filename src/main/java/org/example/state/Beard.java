@@ -2,10 +2,7 @@ package org.example.state;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.example.Utils;
-import org.example.state.params.BeardSector;
-import org.example.state.params.HairColor;
-import org.example.state.params.HairLong;
-import org.example.state.params.Styling;
+import org.example.state.params.*;
 
 import java.util.List;
 
@@ -19,12 +16,6 @@ public class Beard {
     public HairColor color;
     public List<Styling> stylings;
 
-    public Beard( int cheeks, int chin, int mustache ) {
-        this.cheeks = Utils.getLong( HEAD, cheeks );
-        this.chin = Utils.getLong( HEAD, chin );
-        this.mustache = Utils.getLong( HEAD, mustache );
-    }
-
     public void setSector( BeardSector sector, HairLong size ) {
         switch ( sector ) {
             case CHEEKS: {
@@ -37,6 +28,23 @@ public class Beard {
             }
             default: {
                 mustache = size;
+                break;
+            }
+        }
+    }
+
+    public void setSector( BeardSector sector, Integer size ) {
+        switch ( sector ) {
+            case CHEEKS: {
+                cheeks = Utils.getLong( HEAD, size );;
+                break;
+            }
+            case CHIN: {
+                chin = Utils.getLong( HEAD, size );;
+                break;
+            }
+            default: {
+                mustache = Utils.getLong( HEAD, size );;
                 break;
             }
         }

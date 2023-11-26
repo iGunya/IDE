@@ -16,12 +16,6 @@ public class Head {
     public HairColor color;
     public List<Styling> stylings;
 
-    public Head( int whisky, int back, int top ) {
-        this.whisky = Utils.getLong( HEAD, whisky );
-        this.back = Utils.getLong( HEAD, back );
-        this.top = Utils.getLong( HEAD, top );
-    }
-
     public void setSector( HeadSector sector, HairLong size ) {
         switch ( sector ) {
             case TOP: {
@@ -34,6 +28,23 @@ public class Head {
             }
             default: {
                 whisky = size;
+                break;
+            }
+        }
+    }
+
+    public void setSector( HeadSector sector, Integer size ) {
+        switch ( sector ) {
+            case TOP: {
+                top = Utils.getLong( HEAD, size );
+                break;
+            }
+            case BACK: {
+                back = Utils.getLong( HEAD, size );
+                break;
+            }
+            default: {
+                whisky = Utils.getLong( HEAD, size );
                 break;
             }
         }

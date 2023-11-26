@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class HaircutDesiredState {
 
-    public List<TypeHaircut> strings;
+    public List<TypeHaircut> haircuts;
     public Map<String, HairLong> sectorSize = new HashMap<>();
     public List<Styling> hairStylings = new ArrayList<>();
     public List<Styling> beardStylings = new ArrayList<>();
