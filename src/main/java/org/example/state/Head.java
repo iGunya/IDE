@@ -13,7 +13,7 @@ public class Head {
     public HairLong whisky;
     public HairLong back;
     public HairLong top;
-    public HairColor color;
+    public HairColor color = HairColor.NO_CHANGE;
     public List<Styling> stylings;
     public boolean isBase;
     public boolean isInit;
@@ -53,18 +53,18 @@ public class Head {
     }
 
     public String createFileImageName() {
-        if ( isInit )
+        if ( !isInit )
             return null;
 
-        StringBuilder fileName = new StringBuilder();
-        fileName.append( color == null ? "black" : color.name );
+        StringBuilder fileName = new StringBuilder( "black" );
         fileName.append( "_" ).append( top.name().toLowerCase() ).append( "_top" );
         fileName.append( "_" ).append( whisky.name().toLowerCase() ).append( "_wisky" );
-        if ( isBase )
-            fileName.append( "_base" );
-        else if ( stylings != null )
+        if ( stylings != null )
             for ( Styling styling: stylings)
-                fileName.append( "_" ).append( styling.name );
+                fileName.append( "_" ).append( styling.name().toLowerCase() );
+        else
+            fileName.append( "_base" );
+
 
         return fileName.append( ".png" ).toString();
     }

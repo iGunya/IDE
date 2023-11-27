@@ -1,18 +1,27 @@
 package org.example.controller;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.effect.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import org.apache.commons.lang3.Validate;
 import org.controlsfx.control.CheckComboBox;
+import org.example.Utils;
 import org.example.behaviour.CommandBihaviour;
 import org.example.behaviour.StepHolder;
 import org.example.di.Containers;
@@ -23,6 +32,7 @@ import org.example.state.Step;
 import org.example.state.params.*;
 
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.example.state.params.TypeHaircut.*;
@@ -47,6 +57,15 @@ public class FxController {
     private Button confirm;
     @FXML
     private Button run;
+
+    @FXML
+    private Group mirrowImage;
+    @FXML
+    private Label mirrowLabel;
+    @FXML
+    private Group disiredImage;
+    @FXML
+    private Label disiredLabel;
 
     @FXML
     public void typeHaircutHandler() {
@@ -153,8 +172,9 @@ public class FxController {
     private Spinner<Integer> createSpinner(int min, int max) {
         Spinner<Integer> spinner = new Spinner<>();
         SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, 5);
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, 200);
         spinner.setValueFactory(valueFactory);
+        spinner.setEditable( true );
         return spinner;
     }
 
@@ -468,5 +488,69 @@ public class FxController {
         row.setMinWidth( vBoxButton.getPrefWidth() );
         stepHolder.getLast().command.setView( row );
         vBoxInput.getChildren().add( row );
+        if ( stackButton.isEmpty() )
+            run.setVisible( true );
+    }
+
+    private Integer stepIterator = 0;
+
+    @FXML
+    private void runProgrumHandler() {
+        if ( run.getText().equals( "Запустить" ) )
+            run.setText( "Далее" );
+        if ( stepIterator != 0 )
+            stepHolder.getSteps().get( stepIterator - 1 ).command.swapLight();
+        if ( stepIterator >= stepHolder.getSteps().size() ) {
+            mirrowLabel.setVisible( false );
+            run.setVisible( false );
+            return;
+        }
+
+        Step step = stepHolder.getSteps().get( stepIterator++ );
+        step.command.swapLight();
+        if ( !step.head.isInit && !step.beard.isInit )
+            return;
+
+        ImmutableList.Builder<ImageView> builder = ImmutableList.builder();
+
+        builder.add( createBaseFaceViews() );
+        String fileImageForHead = step.head.createFileImageName();
+        if ( fileImageForHead != null )
+            builder.addAll( createFaceImage( ImmutableList.of( fileImageForHead ), step.head.color.color ) );
+        List<String> fileImageForBeard = step.beard.createFileImageName();
+        if ( fileImageForBeard != null )
+            builder.addAll( createFaceImage( fileImageForBeard, step.beard.color.color ) );
+        mirrowLabel.setVisible( true );
+        mirrowImage.getChildren().clear();
+        mirrowImage.getChildren().addAll( builder.build() );
+    }
+
+
+
+    private List<ImageView> createFaceImage( List<String> hairPaths, Color color ) {
+        System.out.println( "Файлы для отображения: " + hairPaths );
+        List<ImageView> face = new ArrayList<>();
+        for ( String hairPath: hairPaths ) {
+
+            ImageView hairImage = new ImageView( new Image(
+                    getClass().getResourceAsStream( "/image/" + hairPath )
+            ) );
+
+            Utils.setColorFor( hairImage, color );
+            hairImage.setFitHeight( 275 );
+            hairImage.setFitWidth( 270 );
+            face.add( hairImage );
+        }
+
+        return face;
+    }
+
+    private ImageView createBaseFaceViews() {
+        ImageView baseImage = new ImageView ( new Image(
+                getClass().getResourceAsStream("/image/base.png")
+        ) );
+        baseImage.setFitHeight( 275 );
+        baseImage.setFitWidth( 270 );
+        return baseImage;
     }
 }

@@ -22,10 +22,9 @@ public class App extends Application {
         Thread.setDefaultUncaughtExceptionHandler(App::showError);
 
         FXMLLoader fxmlLoader = new FXMLLoader( App.class.getResource( "haircut.fxml" ) );
-        Scene scene = new Scene(fxmlLoader.load());
+        Scene scene = new Scene(fxmlLoader.load(), 1050, 900);
         stage.setScene(scene);
         stage.setTitle( "Барбер (づ ◕‿◕ )づ" );
-        stage.setMaximized( true );
         stage.show();
     }
 
@@ -35,11 +34,11 @@ public class App extends Application {
             showErrorDialog(e);
         } else {
             System.err.println("An unexpected error occurred in "+t);
-
         }
     }
 
     private static void showErrorDialog(Throwable e) {
+        e.printStackTrace();
         StringWriter errorMsg = new StringWriter();
         e.printStackTrace(new PrintWriter(errorMsg));
         Alert alert = new Alert( Alert.AlertType.ERROR);

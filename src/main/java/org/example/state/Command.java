@@ -22,7 +22,6 @@ public class Command {
     public void setView( HBox view ) {
         this.view = view;
         Label commandLable = new Label( String.format( command.stingCommand,  params.toLowerCase() ) );
-        view.setStyle( "-fx-background-color: #9eace9;" );
         commandLable.setFont( new Font( 18 ) );
         view.getChildren().add( commandLable );
     }
@@ -33,6 +32,11 @@ public class Command {
 
     public void swapLight() {
         this.isLight = !isLight;
-        view.setStyle( "-fx-background-color: #2b4fff;" );
+        if ( this.isLight )
+            view.setStyle( "-fx-background-color: #2b4fff;" );
+        else {
+            view.getStyleClass().clear();
+            view.setStyle( null );
+        }
     }
 }

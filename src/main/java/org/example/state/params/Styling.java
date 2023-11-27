@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 public enum Styling {
 
-    BANGS_LEFT( "челка влево" ),
-    BANGS_RIGHT( "челка вправо" ),
+    LEFT( "челка влево" ),
+    RIGHT( "челка вправо" ),
     CURLS( "кудри" ),
     PARTING( "пробор" ),
     DREADLOCKS( "дреды" ),

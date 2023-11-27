@@ -14,7 +14,7 @@ public class Beard {
     public HairLong cheeks;
     public HairLong chin;
     public HairLong mustache;
-    public HairColor color;
+    public HairColor color = HairColor.NO_CHANGE;
     public List<Styling> stylings;
     public boolean isBase;
     public boolean isInit;
@@ -54,7 +54,7 @@ public class Beard {
     }
 
     public List<String> createFileImageName() {
-        if ( isInit )
+        if ( !isInit )
             return null;
 
         String colorName = color == null ? "black" : color.name;
