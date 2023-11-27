@@ -1,7 +1,5 @@
 package org.example.behaviour;
 
-import com.google.common.collect.ImmutableList;
-import javafx.scene.layout.HBox;
 import org.apache.commons.lang3.Validate;
 import org.example.Utils;
 import org.example.di.Containers;
@@ -13,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.example.state.params.BeardSector.*;
-import static org.example.state.params.HeadSector.*;
 import static org.example.state.params.TypeHaircut.*;
 
 public class CommandBihaviour {
@@ -45,6 +41,7 @@ public class CommandBihaviour {
         Command command = new Command( CommandConstants.CURRENT_LONG );
         command.params =  sector.aliases.get( 1 ) + " " + x;
         step.command = command;
+        step.stateSetter = () -> step.head.setSector( sector, x );
         stepHolder.addStep( step );
         stateBefore.sectorSize.put( sector.name(), x);
     }
@@ -54,6 +51,7 @@ public class CommandBihaviour {
         Command command = new Command( CommandConstants.CURRENT_LONG );
         command.params =  sector.aliases.get( 1 ) + " " + x;
         step.command = command;
+        step.stateSetter = () -> step.beard.setSector( sector, x );
         stepHolder.addStep( step );
         stateBefore.sectorSize.put( sector.name(), x);
     }
@@ -65,14 +63,13 @@ public class CommandBihaviour {
             case HEAD: {
                 HeadSector sector = HeadSector.sectorFrom( sectorSting );
                 validateDisiredLessThenCurrent( sector, x);
-                step.head.setSector( sector, x );
-                stateDisired.sectorSize.put( WHISKY.name(), Utils.getLong( HEAD, x ) );
+                stateDisired.sectorSize.put( HeadSector.sectorFrom( sectorSting ).name(), Utils.getLong( HEAD, x ) );
+                break;
             }
             default: {
                 BeardSector sector = BeardSector.sectorFrom( sectorSting );
                 validateDisiredLessThenCurrent( sector, x);
-                step.beard.setSector( sector, x );
-                stateDisired.sectorSize.put( CHIN.name(), Utils.getLong( BRARD, x ) );
+                stateDisired.sectorSize.put( BeardSector.sectorFrom( sectorSting ).name(), Utils.getLong( BRARD, x ) );
             }
 
         }
@@ -95,17 +92,8 @@ public class CommandBihaviour {
     public void hairColor( TypeHaircut haircut, HairColor color ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.HAIR_COLOR );
-        command.params = color.toString();
+        command.params = color.name;
         step.command = command;
-        switch ( haircut ) {
-            case HEAD: {
-                step.head.color = color;
-            }
-            default: {
-                step.beard.color = color;
-            }
-
-        }
         stateDisired.hairColor = color;
         copyPrevState( step );
         stepHolder.addStep( step );
@@ -113,14 +101,14 @@ public class CommandBihaviour {
 
     private void copyPrevState( Step step ) {
         Step last = stepHolder.getLast();
-        step.beard = last.beard;
-        step.head = last.head;
+        step.beard = Beard.copyFrom( last.beard );
+        step.head = Head.copyFrom( last.head );
     }
 
     public void hairStyling( List<Styling> styling ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.HAIR_STYLING );
-        command.params = styling.stream().map( Styling::toString ).collect( Collectors.joining( ", " ) );
+        command.params = styling.stream().map( e -> e.name ).collect( Collectors.joining( ", " ) );
         step.command = command;
         stateDisired.setStylings( styling );
         copyPrevState( step );
@@ -137,7 +125,7 @@ public class CommandBihaviour {
     public void haircut( TypeHaircut typeHaircut ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.HAIRCUT );
-        command.params = typeHaircut.toString();
+        command.params = typeHaircut.aliases.get( 0 );
         step.command = command;
         copyPrevState( step );
         stepHolder.addStep( step );
@@ -160,12 +148,16 @@ public class CommandBihaviour {
         copyPrevState( step );
         if ( typeHaircut == HEAD ) {
             HeadSector headSector = Arrays.stream( HeadSector.values() ).filter( e -> e.aliases.contains( sector ) ).findFirst().get();
-            HairLong hairLong = stateDisired.sectorSize.get( headSector.name() );
-            step.head.setSector( headSector, hairLong );
+            step.stateSetter = () -> {
+                HairLong hairLong = stateDisired.sectorSize.get( headSector.name() );
+                step.head.setSector( headSector, hairLong );
+            };
         } else {
             BeardSector beardSector = Arrays.stream( BeardSector.values() ).filter( e -> e.aliases.contains( sector ) ).findFirst().get();
-            HairLong hairLong = stateDisired.sectorSize.get( beardSector.name() );
-            step.beard.setSector( beardSector, hairLong );
+            step.stateSetter = () -> {
+                HairLong hairLong = stateDisired.sectorSize.get( beardSector.name() );
+                step.beard.setSector( beardSector, hairLong );
+            };
         }
         stepHolder.addStep( step );
     }
@@ -173,6 +165,7 @@ public class CommandBihaviour {
     public void stylingProcess( TypeHaircut typeHaircut ) {
         Step step = new Step();
         step.command = new Command( CommandConstants.STYLING_PROCESS );
+        step.command.params = "";
         copyPrevState( step );
         if ( typeHaircut == BRARD )
             step.beard.stylings = stateDisired.beardStylings;
@@ -184,6 +177,7 @@ public class CommandBihaviour {
     public void dryingHair() {
         Step step = new Step();
         step.command = new Command( CommandConstants.DRYING_HAIR );
+        step.command.params = "";
         copyPrevState( step );
         stepHolder.addStep( step );
     }

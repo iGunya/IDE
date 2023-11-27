@@ -15,6 +15,8 @@ public class Head {
     public HairLong top;
     public HairColor color;
     public List<Styling> stylings;
+    public boolean isBase;
+    public boolean isInit;
 
     public void setSector( HeadSector sector, HairLong size ) {
         switch ( sector ) {
@@ -48,5 +50,34 @@ public class Head {
                 break;
             }
         }
+    }
+
+    public String createFileImageName() {
+        if ( isInit )
+            return null;
+
+        StringBuilder fileName = new StringBuilder();
+        fileName.append( color == null ? "black" : color.name );
+        fileName.append( "_" ).append( top.name().toLowerCase() ).append( "_top" );
+        fileName.append( "_" ).append( whisky.name().toLowerCase() ).append( "_wisky" );
+        if ( isBase )
+            fileName.append( "_base" );
+        else if ( stylings != null )
+            for ( Styling styling: stylings)
+                fileName.append( "_" ).append( styling.name );
+
+        return fileName.append( ".png" ).toString();
+    }
+
+    public static Head copyFrom( Head copy ) {
+        Head newHead = new Head();
+        newHead.back = copy.back;
+        newHead.top = copy.top;
+        newHead.whisky = copy.whisky;
+        newHead.color = copy.color;
+        newHead.stylings = copy.stylings;
+        newHead.isBase = copy.isBase;
+        newHead.isInit = copy.isInit;
+        return newHead;
     }
 }

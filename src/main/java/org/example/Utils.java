@@ -12,6 +12,6 @@ public class Utils {
                 return hairParams;
             }
         }
-        throw new IllegalArgumentException( "Не должна вылететь" );
+        throw new IllegalArgumentException( "Не должна вылететь " + type );
     }
 }

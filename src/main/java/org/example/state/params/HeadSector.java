@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum HeadSector {
-    WHISKY( ImmutableList.of( "Виски", "Висков" ) ),
-    BACK( ImmutableList.of( "Затылок", "Затылка" ) ),
-    TOP( ImmutableList.of( "Верх", "Верха" ) );
+    WHISKY( ImmutableList.of( "виски", "висков" ) ),
+    BACK( ImmutableList.of( "затылок", "затылка" ) ),
+    TOP( ImmutableList.of( "верх", "верха" ) );
 
     public final List<String> aliases;
 

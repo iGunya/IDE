@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum BeardSector {
-    CHEEKS( ImmutableList.of( "Щеки", "Щек" ) ),
-    CHIN( ImmutableList.of( "Подбородок", "Подбородка" ) ),
-    MUSTACHE( ImmutableList.of( "Усы", "Усов" ) );
+    CHEEKS( ImmutableList.of( "щеки", "щек" ) ),
+    CHIN( ImmutableList.of( "подбородок", "подбородка" ) ),
+    MUSTACHE( ImmutableList.of( "усы", "усов" ) );
 
     public final List<String> aliases;
 
