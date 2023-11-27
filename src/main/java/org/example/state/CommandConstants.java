@@ -12,6 +12,7 @@ public enum CommandConstants {
     HAIRCUT( "Стрижка %s:" ),
     WASHING_HAIR( "\t● Моем волосы" ),
     HAIRCUT_SECTOR( "\t● Стрижем %s" ),
+    COLOR_PROCESS( "\t● Красим волосы" ),
     STYLING_PROCESS( "\t● Укладываем волосы" ),
     DRYING_HAIR( "\t● Сушим волосы" );
 

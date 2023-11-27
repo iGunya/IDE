@@ -144,12 +144,27 @@ public class CommandBihaviour {
         stepHolder.addStep( step );
     }
 
-    public void washingHair() {
+    public void colorProcess( TypeHaircut typeHaircut ) {
+        Step step = new Step();
+        Command command = new Command( CommandConstants.COLOR_PROCESS );
+        command.params = typeHaircut.aliases.get( 0 );
+        step.command = command;
+        copyPrevState( step );
+        if ( typeHaircut == HEAD )
+            step.head.color = stateDisired.hairColor;
+        else
+            step.beard.color = stateDisired.beardColor;
+        stepHolder.addStep( step );
+    }
+
+    public void washingHair( String type ) {
         Step step = new Step();
         Command command = new Command( CommandConstants.WASHING_HAIR );
         command.params = "";
         step.command = command;
         copyPrevState( step );
+        if ( TypeHaircut.typeFrom( type ) == HEAD )
+            step.head.isWashing = true;
         stepHolder.addStep( step );
     }
 

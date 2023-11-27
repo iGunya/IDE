@@ -18,6 +18,7 @@ public class Head {
     public List<Styling> stylings;
     public boolean isBase;
     public boolean isInit;
+    public boolean isWashing;
 
     public void setSector( HeadSector sector, HairLong size ) {
         switch ( sector ) {
@@ -58,6 +59,11 @@ public class Head {
             return null;
 
         StringBuilder fileName = new StringBuilder( "black" );
+        if ( isWashing ) {
+            isWashing = false;
+            return fileName.append( "_" ).append( top.name().toLowerCase() ).append( "_washing" ).append( ".png" ).toString();
+        }
+
         fileName.append( "_" ).append( top.name().toLowerCase() ).append( "_top" );
         fileName.append( "_" ).append( whisky.name().toLowerCase() ).append( "_wisky" );
         if ( stylings != null )

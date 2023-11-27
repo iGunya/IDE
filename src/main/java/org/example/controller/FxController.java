@@ -400,28 +400,50 @@ public class FxController {
             createHaircutSectorButton( HEAD.aliases.get( 0 ), HeadSector.BACK.aliases.get( 0 ) );
             createHaircutSectorButton( HEAD.aliases.get( 0 ), HeadSector.TOP.aliases.get( 0 ) );
             createDryingButton( HEAD.aliases.get( 0 ), HeadSector.WHISKY.aliases.get( 0 ) );
-            createEndStyilingButton( HEAD.aliases.get( 0 ), HeadSector.WHISKY.aliases.get( 0 ) );
+            if ( stateDisired.hairColor != HairColor.NO_CHANGE )
+                creatColorProcessButton( HEAD.aliases.get( 0 ) );
+            if ( stateDisired.hairStylings != null && !stateDisired.hairStylings.isEmpty() )
+                createEndStyilingButton( HEAD.aliases.get( 0 ), HeadSector.WHISKY.aliases.get( 0 ) );
         } else {
             createWahingButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
             createHaircutSectorButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
             createHaircutSectorButton( BRARD.aliases.get( 0 ), BeardSector.CHIN.aliases.get( 0 ) );
             createHaircutSectorButton( BRARD.aliases.get( 0 ), BeardSector.MUSTACHE.aliases.get( 0 ) );
+            if ( stateDisired.beardColor != HairColor.NO_CHANGE )
+                creatColorProcessButton( BRARD.aliases.get( 0 ) );
             createDryingButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
-            createEndStyilingButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
+            if ( stateDisired.beardStylings != null && !stateDisired.beardStylings.isEmpty() )
+                createEndStyilingButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
         }
 
     }
 
+    private void creatColorProcessButton( String type ) {
+        Button button = new Button( "Красим волосы" );
+        button.setOnAction( e -> colorProcessHandler( e, type ) );
+        button.idProperty().set( "color" + type + "_" );
+        button.setMinWidth( vBoxButton.getPrefWidth() );
+        vBoxButton.getChildren().add( button );
+    }
+
+    private void colorProcessHandler( ActionEvent event, String type  ) {
+        commandBihaviour.colorProcess( TypeHaircut.typeFrom( type ) );
+        HBox row = new HBox();
+        row.setMinWidth( vBoxButton.getPrefWidth() );
+        stepHolder.getLast().command.setView( row );
+        vBoxInput.getChildren().add( row );
+    }
+
     private void createWahingButton( String type, String sector ) {
         Button button = new Button( "Моем волосы" );
-        button.setOnAction( this::wahingHandler );
+        button.setOnAction( e -> wahingHandler( e, type, sector ) );
         button.idProperty().set( "wahing" + type + "_" + sector );
         button.setMinWidth( vBoxButton.getPrefWidth() );
         vBoxButton.getChildren().add( button );
     }
 
-    private void wahingHandler( ActionEvent event ) {
-        commandBihaviour.washingHair();
+    private void wahingHandler( ActionEvent event, String type, String sector  ) {
+        commandBihaviour.washingHair( type );
         HBox row = new HBox();
         row.setMinWidth( vBoxButton.getPrefWidth() );
         stepHolder.getLast().command.setView( row );
@@ -510,6 +532,7 @@ public class FxController {
             stepHolder.getSteps().get( stepIterator - 1 ).command.swapLight();
         if ( stepIterator >= stepHolder.getSteps().size() ) {
             run.setVisible( false );
+            endHaircut();
             return;
         }
 
@@ -557,7 +580,7 @@ public class FxController {
                         getClass().getResourceAsStream( "/image/" + hairPath )
                 ) );
             } catch ( NullPointerException e ) {
-                System.out.println( "Отсутсвует файл" );
+                System.out.println( "Отсутсвует файл: " + hairPath );
                 continue;
             }
 
@@ -577,5 +600,11 @@ public class FxController {
         baseImage.setFitHeight( 275 );
         baseImage.setFitWidth( 270 );
         return baseImage;
+    }
+
+    private void endHaircut() {
+        Alert alert = new Alert( Alert.AlertType.INFORMATION);
+        alert.setContentText( "Стрижка закончена" );
+        alert.showAndWait();
     }
 }
