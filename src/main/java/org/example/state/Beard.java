@@ -57,7 +57,7 @@ public class Beard {
         if ( !isInit )
             return null;
 
-        String colorName = color == null ? "black" : color.name;
+        String colorName = "black";
         StringBuilder fileNameCheeks = new StringBuilder( colorName );
         StringBuilder fileNameChin = new StringBuilder( colorName );
         StringBuilder fileNameMustache = new StringBuilder( colorName );
@@ -65,11 +65,11 @@ public class Beard {
         fileNameCheeks.append( "_" ).append( cheeks.name().toLowerCase() ).append( "_cheeks" );
         fileNameChin.append( "_" ).append( chin.name().toLowerCase() ).append( "_chin" );
         fileNameMustache.append( "_" ).append( mustache.name().toLowerCase() ).append( "_mustache" );
-        if ( isBase )
-            fileNameMustache.append( "_base" );
-        else if ( stylings != null )
+        if ( stylings != null )
             for ( Styling styling: stylings)
                 fileNameMustache.append( "_" ).append( styling.name );
+        else
+            fileNameMustache.append( "_base" );
 
         return ImmutableList.of( fileNameCheeks.append( ".png" ).toString(),
                 fileNameCheeks.append( ".png" ).toString(),

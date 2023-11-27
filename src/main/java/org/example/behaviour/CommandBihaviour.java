@@ -101,7 +101,10 @@ public class CommandBihaviour {
         Command command = new Command( CommandConstants.HAIR_COLOR );
         command.params = color.name;
         step.command = command;
-        stateDisired.hairColor = color;
+        if ( haircut == HEAD )
+            stateDisired.hairColor = color;
+        else
+            stateDisired.beardColor = color;
         copyPrevState( step );
         stepHolder.addStep( step );
     }

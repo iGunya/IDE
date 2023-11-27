@@ -523,6 +523,18 @@ public class FxController {
         mirrowLabel.setVisible( true );
         mirrowImage.getChildren().clear();
         mirrowImage.getChildren().addAll( builder.build() );
+
+        ImmutableList.Builder<ImageView> disireBuilder = ImmutableList.builder();
+        disireBuilder.add( createBaseFaceViews() );
+        String disiredFileImageForHead = stateDisired.createFileImageNamesForHead();
+        if ( disiredFileImageForHead != null )
+            disireBuilder.addAll( createFaceImage( ImmutableList.of( disiredFileImageForHead ), stateDisired.hairColor.color ) );
+        List<String> disiredFileImageForBeard = stateDisired.createFileImageNamesForBeard();
+        if ( disiredFileImageForBeard != null )
+            disireBuilder.addAll( createFaceImage( disiredFileImageForBeard, stateDisired.beardColor.color ) );
+        disiredLabel.setVisible( true );
+        disiredImage.getChildren().clear();
+        disiredImage.getChildren().addAll( disireBuilder.build() );
     }
 
 
