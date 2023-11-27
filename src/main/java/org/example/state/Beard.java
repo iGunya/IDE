@@ -3,10 +3,13 @@ package org.example.state;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.example.Utils;
+import org.example.di.Containers;
 import org.example.state.params.*;
 
 import java.util.List;
 
+import static org.example.state.params.BeardSector.*;
+import static org.example.state.params.TypeHaircut.BRARD;
 import static org.example.state.params.TypeHaircut.HEAD;
 
 public class Beard {
@@ -39,22 +42,22 @@ public class Beard {
     public void setSector( BeardSector sector, Integer size ) {
         switch ( sector ) {
             case CHEEKS: {
-                cheeks = Utils.getLong( HEAD, size );;
+                cheeks = Utils.getLong( BRARD, size );;
                 break;
             }
             case CHIN: {
-                chin = Utils.getLong( HEAD, size );;
+                chin = Utils.getLong( BRARD, size );;
                 break;
             }
             default: {
-                mustache = Utils.getLong( HEAD, size );;
+                mustache = Utils.getLong( BRARD, size );;
                 break;
             }
         }
     }
 
     public List<String> createFileImageName() {
-        if ( !isInit )
+        if ( !isInit || !Containers.getStateDisired().haircuts.contains( BRARD ) )
             return null;
 
         String colorName = "black";
@@ -62,17 +65,20 @@ public class Beard {
         StringBuilder fileNameChin = new StringBuilder( colorName );
         StringBuilder fileNameMustache = new StringBuilder( colorName );
 
-        fileNameCheeks.append( "_" ).append( cheeks.name().toLowerCase() ).append( "_cheeks" );
-        fileNameChin.append( "_" ).append( chin.name().toLowerCase() ).append( "_chin" );
-        fileNameMustache.append( "_" ).append( mustache.name().toLowerCase() ).append( "_mustache" );
+        if ( cheeks != null )
+            fileNameCheeks.append( "_" ).append( cheeks.name().toLowerCase() ).append( "_cheeks" );
+        if ( chin != null )
+            fileNameChin.append( "_" ).append( chin.name().toLowerCase() ).append( "_chin" );
+        if ( mustache != null )
+            fileNameMustache.append( "_" ).append( mustache.name().toLowerCase() ).append( "_mustache" );
         if ( stylings != null )
             for ( Styling styling: stylings)
-                fileNameMustache.append( "_" ).append( styling.name );
+                fileNameMustache.append( "_" ).append( styling.name().toLowerCase() );
         else
             fileNameMustache.append( "_base" );
 
         return ImmutableList.of( fileNameCheeks.append( ".png" ).toString(),
-                fileNameCheeks.append( ".png" ).toString(),
+                fileNameChin.append( ".png" ).toString(),
                 fileNameMustache.append( ".png" ).toString() );
     }
 

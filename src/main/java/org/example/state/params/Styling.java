@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 public enum Styling {
 
+    PARTING( "пробор" ),
+    CURLS( "кудри" ),
     LEFT( "челка влево" ),
     RIGHT( "челка вправо" ),
-    CURLS( "кудри" ),
-    PARTING( "пробор" ),
     DREADLOCKS( "дреды" ),
     MUSTACHE( "усы" );
 

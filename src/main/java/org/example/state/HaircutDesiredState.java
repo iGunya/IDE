@@ -69,13 +69,13 @@ public class HaircutDesiredState {
         HairLong chinLong = sectorSize.get( CHIN.name() );
         if ( chinLong != null )
             fileNameChin.append( "_" ).append( chinLong.name().toLowerCase() ).append( "_chin" );
-        HairLong mustacheLong = sectorSize.get( CHEEKS.name() );
+        HairLong mustacheLong = sectorSize.get( MUSTACHE.name() );
         if ( mustacheLong != null )
             fileNameMustache.append( "_" ).append( mustacheLong.name().toLowerCase() ).append( "_mustache" );
 
         if ( !beardStylings.isEmpty() )
             for ( Styling styling: beardStylings)
-                fileNameMustache.append( "_" ).append( styling.name );
+                fileNameMustache.append( "_" ).append( styling.name().toLowerCase() );
         else
             fileNameMustache.append( "_base" );
 

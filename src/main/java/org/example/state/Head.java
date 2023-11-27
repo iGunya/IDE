@@ -2,6 +2,7 @@ package org.example.state;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.example.Utils;
+import org.example.di.Containers;
 import org.example.state.params.*;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class Head {
     }
 
     public String createFileImageName() {
-        if ( !isInit )
+        if ( !isInit || !Containers.getStateDisired().haircuts.contains( HEAD ))
             return null;
 
         StringBuilder fileName = new StringBuilder( "black" );

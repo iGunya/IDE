@@ -140,6 +140,7 @@ public class CommandBihaviour {
         step.command = command;
         copyPrevState( step );
         step.head.isInit = true;
+        step.beard.isInit = true;
         stepHolder.addStep( step );
     }
 

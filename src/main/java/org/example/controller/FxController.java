@@ -150,13 +150,17 @@ public class FxController {
     private void createCurrentLongButton( String type, String sector ) {
         Button button = new Button( String.format( "Текущая длина %s", sector.toLowerCase() ) );
         button.idProperty().set( "current_" + type + "_" + sector );
-        button.setOnAction( e -> currentLongHandler( e, sector ) );
+        button.setOnAction( e -> currentLongHandler( e, type, sector ) );
         button.setMinWidth( vBoxButton.getPrefWidth() );
         vBoxButton.getChildren().add( button );
     }
 
-    private void currentLongHandler( ActionEvent event, String sector ) {
-        Spinner<Integer> spinner = createSpinner( 0, 500 );
+    private void currentLongHandler( ActionEvent event, String type, String sector ) {
+        Spinner<Integer> spinner;
+        if ( TypeHaircut.typeFrom( type ) == HEAD )
+            spinner = createSpinner( 0, 500, 200 );
+        else
+            spinner = createSpinner( 0, 150, 60 );
         confirm.setOnAction( e -> inputCurentLong( event, spinner ) );
         confirm.setVisible( true );
         HBox row = new HBox();
@@ -169,10 +173,10 @@ public class FxController {
         vBoxInput.getChildren().add( row );
     }
 
-    private Spinner<Integer> createSpinner(int min, int max) {
+    private Spinner<Integer> createSpinner(int min, int max, int def) {
         Spinner<Integer> spinner = new Spinner<>();
         SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, 200);
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, def );
         spinner.setValueFactory(valueFactory);
         spinner.setEditable( true );
         return spinner;
@@ -205,14 +209,18 @@ public class FxController {
     private void createDisiredLongButton( String type, String sector ) {
         Button button = new Button( String.format( "Желаемая длина %s", sector.toLowerCase() ) );
         button.idProperty().set( "disired_" + type + "_" + sector  );
-        button.setOnAction( e -> disiredLongHandler( e, sector ) );
+        button.setOnAction( e -> disiredLongHandler( e, type, sector ) );
         button.setMinWidth( vBoxButton.getPrefWidth() );
         button.setDisable( true );
         vBoxButton.getChildren().add( button );
     }
 
-    private void disiredLongHandler( ActionEvent event, String sector ) {
-        Spinner<Integer> spinner = createSpinner( 0, 500 );
+    private void disiredLongHandler( ActionEvent event, String type, String sector ) {
+        Spinner<Integer> spinner;
+        if ( TypeHaircut.typeFrom( type ) == HEAD )
+            spinner = createSpinner( 0, 500, 100 );
+        else
+            spinner = createSpinner( 0, 150, 20 );
         confirm.setOnAction( e -> inputDesiredLong( event, spinner ) );
         confirm.setVisible( true );
         HBox row = new HBox();
@@ -501,7 +509,6 @@ public class FxController {
         if ( stepIterator != 0 )
             stepHolder.getSteps().get( stepIterator - 1 ).command.swapLight();
         if ( stepIterator >= stepHolder.getSteps().size() ) {
-            mirrowLabel.setVisible( false );
             run.setVisible( false );
             return;
         }
@@ -544,9 +551,15 @@ public class FxController {
         List<ImageView> face = new ArrayList<>();
         for ( String hairPath: hairPaths ) {
 
-            ImageView hairImage = new ImageView( new Image(
-                    getClass().getResourceAsStream( "/image/" + hairPath )
-            ) );
+            ImageView hairImage;
+            try {
+                hairImage = new ImageView( new Image(
+                        getClass().getResourceAsStream( "/image/" + hairPath )
+                ) );
+            } catch ( NullPointerException e ) {
+                System.out.println( "Отсутсвует файл" );
+                continue;
+            }
 
             Utils.setColorFor( hairImage, color );
             hairImage.setFitHeight( 275 );
