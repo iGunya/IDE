@@ -1,7 +1,9 @@
 package org.example.di;
 
+import javafx.stage.Stage;
 import org.example.behaviour.CommandBihaviour;
 import org.example.behaviour.StepHolder;
+import org.example.controller.ConfirmController;
 import org.example.state.HaircutBeforeState;
 import org.example.state.HaircutDesiredState;
 
@@ -11,6 +13,8 @@ public class Containers {
     private static StepHolder stepHolder;
     private static HaircutDesiredState stateDisired;
     private static HaircutBeforeState stateBefore;
+    private static Stage stage;
+    private static ConfirmController controller;
 
     public static CommandBihaviour getCommandBihaviour() {
         if ( commandBihaviour == null )
@@ -34,5 +38,21 @@ public class Containers {
         if ( stateBefore == null )
             stateBefore = new HaircutBeforeState();
         return stateBefore;
+    }
+
+    public static Stage getStage() {
+        return stage;
+    }
+
+    public static void setStage( Stage stage ) {
+        Containers.stage = stage;
+    }
+
+    public static ConfirmController getController() {
+        return controller;
+    }
+
+    public static void setController( ConfirmController controller ) {
+        Containers.controller = controller;
     }
 }

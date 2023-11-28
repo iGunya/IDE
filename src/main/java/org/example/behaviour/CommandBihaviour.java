@@ -71,12 +71,14 @@ public class CommandBihaviour {
             case HEAD: {
                 HeadSector sector = HeadSector.sectorFrom( sectorSting );
                 validateDisiredLessThenCurrent( sector, x);
+                stateDisired.sectorSizeNumber.put( HeadSector.sectorFrom( sectorSting ).name(), x );
                 stateDisired.sectorSize.put( HeadSector.sectorFrom( sectorSting ).name(), Utils.getLong( HEAD, x ) );
                 break;
             }
             default: {
                 BeardSector sector = BeardSector.sectorFrom( sectorSting );
                 validateDisiredLessThenCurrent( sector, x);
+                stateDisired.sectorSizeNumber.put( BeardSector.sectorFrom( sectorSting ).name(), x );
                 stateDisired.sectorSize.put( BeardSector.sectorFrom( sectorSting ).name(), Utils.getLong( BRARD, x ) );
             }
 
@@ -131,7 +133,10 @@ public class CommandBihaviour {
     public void satisfied() {
         Step step = new Step();
         step.command = new Command( CommandConstants.SATISFIED );
+        step.command.params = "";
         copyPrevState( step );
+        step.head.isInit = true;
+        step.beard.isInit = true;
         stepHolder.addStep( step );
     }
 
@@ -141,8 +146,6 @@ public class CommandBihaviour {
         command.params = typeHaircut.aliases.get( 0 );
         step.command = command;
         copyPrevState( step );
-        step.head.isInit = true;
-        step.beard.isInit = true;
         stepHolder.addStep( step );
     }
 
@@ -170,11 +173,13 @@ public class CommandBihaviour {
         stepHolder.addStep( step );
     }
 
-    public void haircutSector( TypeHaircut typeHaircut, String sector ) {
+    public void haircutSector( String typeHaircutString, String sector ) {
+        TypeHaircut typeHaircut = typeFrom( typeHaircutString );
         Step step = new Step();
         Command command = new Command( CommandConstants.HAIRCUT_SECTOR );
         command.params =  sector;
         step.command = command;
+        step.idStep = typeHaircutString + "_" + sector;
         copyPrevState( step );
         if ( typeHaircut == HEAD ) {
             HeadSector headSector = Arrays.stream( HeadSector.values() ).filter( e -> e.aliases.contains( sector ) ).findFirst().get();

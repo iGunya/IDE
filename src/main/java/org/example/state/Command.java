@@ -30,8 +30,17 @@ public class Command {
         this.params = params;
     }
 
-    public void swapLight() {
-        this.isLight = !isLight;
+    public void offLight() {
+        this.isLight = false;
+        light();
+    }
+
+    public void onLight() {
+        this.isLight = true;
+        light();
+    }
+
+    private void light() {
         if ( this.isLight )
             view.setStyle( "-fx-background-color: #2b4fff;" );
         else {

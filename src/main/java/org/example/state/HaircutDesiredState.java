@@ -19,7 +19,8 @@ public class HaircutDesiredState {
     public List<Styling> hairStylings = new ArrayList<>();
     public List<Styling> beardStylings = new ArrayList<>();
     public HairColor hairColor = HairColor.NO_CHANGE;
-    public HairColor beardColor = HairColor.NO_CHANGE;;
+    public HairColor beardColor = HairColor.NO_CHANGE;
+    public Map<String, Integer> sectorSizeNumber = new HashMap<>();
 
     public void setStylings( List<Styling> stylings ) {
         for ( Styling styiling: stylings) {

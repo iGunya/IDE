@@ -2,12 +2,15 @@ package org.example.controller;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.sun.rowset.internal.Row;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,25 +19,28 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.control.CheckComboBox;
+import org.example.App;
 import org.example.Utils;
 import org.example.behaviour.CommandBihaviour;
 import org.example.behaviour.StepHolder;
 import org.example.di.Containers;
-import org.example.state.CommandConstants;
-import org.example.state.HaircutBeforeState;
-import org.example.state.HaircutDesiredState;
-import org.example.state.Step;
+import org.example.state.*;
 import org.example.state.params.*;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.example.Utils.createInputBoxWithSpinner;
 import static org.example.state.params.TypeHaircut.*;
 
 public class FxController {
@@ -46,6 +52,7 @@ public class FxController {
     private final Stack<Button> stackButton = new Stack<>();
 
     private final Set<String> colorStyilingDrying = ImmutableSet.of( "color", "styiling", "drying" );
+    private final Map<String, Step> disiredSteps = new HashMap<>();
 
     @FXML
     private VBox vBoxButton;
@@ -66,6 +73,7 @@ public class FxController {
     private Group disiredImage;
     @FXML
     private Label disiredLabel;
+
 
     @FXML
     public void typeHaircutHandler() {
@@ -156,31 +164,15 @@ public class FxController {
     }
 
     private void currentLongHandler( ActionEvent event, String type, String sector ) {
-        Spinner<Integer> spinner;
-        if ( TypeHaircut.typeFrom( type ) == HEAD )
-            spinner = createSpinner( 0, 500, 200 );
-        else
-            spinner = createSpinner( 0, 150, 60 );
-        confirm.setOnAction( e -> inputCurentLong( event, spinner ) );
+        Pair<Spinner<Integer>, HBox> inputBoxWithSpinner =
+                createInputBoxWithSpinner( type, sector, CommandConstants.CURRENT_LONG, TypeHaircut.typeFrom( type ) == HEAD ? 200 : 60 );
+
+        confirm.setOnAction( e -> inputCurentLong( event, inputBoxWithSpinner.getKey() ) );
         confirm.setVisible( true );
-        HBox row = new HBox();
-        String[] currentLong = CommandConstants.CURRENT_LONG.stingCommand.split( "%." );
-        Label commandStart = new Label( currentLong[0] + " " + sector );
-        commandStart.setFont( new Font( 18 ) );
-        Label commandEnd = new Label( currentLong[1] );
-        commandEnd.setFont( new Font( 18 ) );
-        row.getChildren().addAll( commandStart, spinner, commandEnd );
-        vBoxInput.getChildren().add( row );
+
+        vBoxInput.getChildren().add( inputBoxWithSpinner.getValue() );
     }
 
-    private Spinner<Integer> createSpinner(int min, int max, int def) {
-        Spinner<Integer> spinner = new Spinner<>();
-        SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, def );
-        spinner.setValueFactory(valueFactory);
-        spinner.setEditable( true );
-        return spinner;
-    }
 
     private void inputCurentLong( ActionEvent event, Spinner<Integer> spinner ) {
         Integer value = spinner.getValue();
@@ -229,24 +221,15 @@ public class FxController {
     }
 
     private void disiredLongHandler( ActionEvent event, String type, String sector ) {
-        Spinner<Integer> spinner;
-        if ( TypeHaircut.typeFrom( type ) == HEAD )
-            spinner = createSpinner( 0, 500, 100 );
-        else
-            spinner = createSpinner( 0, 150, 20 );
-        confirm.setOnAction( e -> inputDesiredLong( event, spinner ) );
+        Pair<Spinner<Integer>, HBox> inputBoxWithSpinner =
+                createInputBoxWithSpinner( type, sector, CommandConstants.DESIRED_LONG, TypeHaircut.typeFrom( type ) == HEAD ? 100 : 20 );
+        confirm.setOnAction( e -> inputDesiredLong( event, inputBoxWithSpinner.getKey() , type, sector ) );
         confirm.setVisible( true );
-        HBox row = new HBox();
-        String[] currentLong = CommandConstants.DESIRED_LONG.stingCommand.split( "%." );
-        Label commandStart = new Label( currentLong[0] + " " + sector );
-        commandStart.setFont( new Font( 18 ) );
-        Label commandEnd = new Label( currentLong[1] );
-        commandEnd.setFont( new Font( 18 ) );
-        row.getChildren().addAll( commandStart, spinner, commandEnd );
-        vBoxInput.getChildren().add( row );
+
+        vBoxInput.getChildren().add( inputBoxWithSpinner.getValue() );
     }
 
-    private void inputDesiredLong( ActionEvent event, Spinner<Integer> spinner ) {
+    private void inputDesiredLong( ActionEvent event, Spinner<Integer> spinner, String type, String sector  ) {
         Integer value = spinner.getValue();
         Validate.isTrue( value > 0, "Длинна волос не может быть отрицательной" );
 
@@ -271,6 +254,7 @@ public class FxController {
         HBox row = new HBox();
         row.setMinWidth( vBoxButton.getPrefWidth() );
         stepHolder.getLast().command.setView( row );
+        disiredSteps.put( type + "_" + sector, stepHolder.getLast() );
         vBoxInput.getChildren().add( row );
         confirm.setVisible( false );
 
@@ -296,9 +280,7 @@ public class FxController {
             return;
         }
         if ( !isHaicut )
-            for ( TypeHaircut typeHaircut : stateDisired.haircuts) {
-                createHaircutButton( typeHaircut );
-            }
+            createSatisfiedButton();
         else
             run.setVisible( true );
     }
@@ -332,7 +314,6 @@ public class FxController {
     private void disabeDisiredButton() {
         vBoxButton.getChildren().stream().filter( node ->  node.idProperty().get().startsWith( "disired_" ) )
                 .forEach( node -> node.setDisable( true ) );
-        stateDisired.beardColor = stateBefore.beardColor;
         for ( Map.Entry<String, HairLong> sectorSize: stateBefore.sectorSize.entrySet() ) {
             stateDisired.sectorSize.computeIfAbsent( sectorSize.getKey(), v -> sectorSize.getValue() );
         }
@@ -395,6 +376,26 @@ public class FxController {
         vBoxInput.getChildren().remove( vBoxInput.getChildren().size() - 1 );
         vBoxInput.getChildren().add( row );
         confirm.setVisible( false );
+    }
+
+    private void createSatisfiedButton() {
+        Button button = new Button( "Опрос" );
+        button.setOnAction( this::satisfiedHandler );
+        button.setMinWidth( vBoxButton.getPrefWidth() );
+        vBoxButton.getChildren().add( button );
+    }
+
+    private void satisfiedHandler( ActionEvent event ) {
+        commandBihaviour.satisfied();
+        HBox row = new HBox();
+        row.setMinWidth( vBoxButton.getPrefWidth() );
+        stepHolder.getLast().command.setView( row );
+        vBoxInput.getChildren().add( row );
+
+        vBoxButton.getChildren().clear();
+        for ( TypeHaircut typeHaircut : stateDisired.haircuts) {
+            createHaircutButton( typeHaircut );
+        }
     }
 
     private void createHaircutButton( TypeHaircut typeHaircut ) {
@@ -488,7 +489,7 @@ public class FxController {
     private void haircutSectorHandler( ActionEvent event ) {
         Button haircutSectorButton = ( Button )event.getTarget();
         String[] id = haircutSectorButton.idProperty().get().split( "_" );
-        commandBihaviour.haircutSector( TypeHaircut.typeFrom( id[1] ), id[2] );
+        commandBihaviour.haircutSector( id[1], id[2] );
         haircutSectorButton.setDisable( true );
         boolean allowedNext = true;
         for ( Node node : vBoxButton.getChildren() ) {
@@ -556,7 +557,7 @@ public class FxController {
         if ( run.getText().equals( "Запустить" ) )
             run.setText( "Далее" );
         if ( stepIterator != 0 )
-            stepHolder.getSteps().get( stepIterator - 1 ).command.swapLight();
+            stepHolder.getSteps().get( stepIterator - 1 ).command.offLight();
         if ( stepIterator >= stepHolder.getSteps().size() ) {
             run.setVisible( false );
             endHaircut();
@@ -564,7 +565,29 @@ public class FxController {
         }
 
         Step step = stepHolder.getSteps().get( stepIterator++ );
-        step.command.swapLight();
+        step.command.onLight();
+        if ( step.command.command == CommandConstants.HAIRCUT_SECTOR ||
+             step.command.command == CommandConstants.COLOR_PROCESS ||
+             step.command.command == CommandConstants.STYLING_PROCESS ||
+             step.command.command == CommandConstants.WASHING_HAIR ||
+             step.command.command == CommandConstants.DRYING_HAIR ||
+             step.command.command == CommandConstants.HAIRCUT ) {
+            String idStep = step.idStep;
+            Utils.copyPrevStateLong( stepIterator - 1 );
+            if ( idStep != null ) {
+                String[] id = step.idStep.split( "_" );
+                TypeHaircut typeHaircut = typeFrom( id[0] );
+                if ( typeHaircut == HEAD ) {
+                    HeadSector headSector = HeadSector.sectorFrom( id[1] );
+                    HairLong hairLong = stateDisired.sectorSize.get( headSector.name() );
+                    step.head.setSector( headSector, hairLong );
+                } else {
+                    BeardSector headSector = BeardSector.sectorFrom( id[1] );
+                    HairLong hairLong = stateDisired.sectorSize.get( headSector.name() );
+                    step.beard.setSector( headSector, hairLong );
+                }
+            }
+        }
         if ( !step.head.isInit && !step.beard.isInit )
             return;
 
@@ -592,6 +615,9 @@ public class FxController {
         disiredLabel.setVisible( true );
         disiredImage.getChildren().clear();
         disiredImage.getChildren().addAll( disireBuilder.build() );
+        if ( step.command.command == CommandConstants.SATISFIED ) {
+            satisfiedBehaviour();
+        }
     }
 
 
@@ -633,5 +659,46 @@ public class FxController {
         Alert alert = new Alert( Alert.AlertType.INFORMATION);
         alert.setContentText( "Стрижка закончена" );
         alert.showAndWait();
+    }
+
+    private void satisfiedBehaviour() {
+        showConfirmationDialog();
+    }
+
+    private void showConfirmationDialog() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Вас устравивает ожидаемый результат");
+        alert.setTitle("Опрос");
+        alert.setContentText("Выберите Да или Нет.");
+
+        ButtonType buttonTypeYes = new ButtonType("Да");
+        ButtonType buttonTypeNo = new ButtonType("Нет");
+
+        alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeNo);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == buttonTypeNo) {
+            stepHolder.getSteps().get( stepIterator ).command.offLight();
+            stepIterator--;
+            createInputScene();
+        }
+    }
+
+    private void createInputScene() {
+
+        Stage dialog = new Stage();
+
+        FXMLLoader fxmlLoader = new FXMLLoader( App.class.getResource( "confirm.fxml" ) );
+        Scene scene = null;
+        try {
+            scene = new Scene(fxmlLoader.load(), 600, 420);
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+
+        dialog.setScene(scene);
+        dialog.setTitle("Введите данные");
+        dialog.show();
+        Containers.getController().fillInputScene( dialog, disiredSteps );
     }
 }

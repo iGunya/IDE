@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import org.example.di.Containers;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,7 +21,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         Thread.setDefaultUncaughtExceptionHandler(App::showError);
-
+        Containers.setStage( stage );
         FXMLLoader fxmlLoader = new FXMLLoader( App.class.getResource( "haircut.fxml" ) );
         Scene scene = new Scene(fxmlLoader.load(), 1150, 900);
         stage.setScene(scene);
