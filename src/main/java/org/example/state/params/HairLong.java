@@ -15,7 +15,7 @@ public enum HairLong {
                             BRARD, new LongParams( ImmutableSet.of(), 0, 10 ) ) ),
     MIDLE( ImmutableMap.of( HEAD, new LongParams( ImmutableSet.of( LEFT, RIGHT, CURLS, PARTING, DREADLOCKS), 51, 150 ),
                             BRARD, new LongParams( ImmutableSet.of( MUSTACHE ) , 11, 50 ) ) ),
-    LONG( ImmutableMap.of( HEAD, new LongParams( ImmutableSet.of( DREADLOCKS, PARTING ), 151, 500 ),
+    LONG( ImmutableMap.of( HEAD, new LongParams( ImmutableSet.of( DREADLOCKS, PARTING, CURLS ), 151, 500 ),
                            BRARD, new LongParams( ImmutableSet.of( MUSTACHE ) , 51, 150) ) );
 
     public final Map<TypeHaircut, LongParams> hairSectorParams;

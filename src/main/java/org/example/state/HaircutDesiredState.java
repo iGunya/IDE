@@ -45,7 +45,7 @@ public class HaircutDesiredState {
         StringBuilder fileName = new StringBuilder( "black" );
         fileName.append( "_" ).append( sectorSize.get( TOP.name() ).name().toLowerCase() ).append( "_top" );
         fileName.append( "_" ).append( sectorSize.get( WHISKY.name() ).name().toLowerCase() ).append( "_wisky" );
-        if ( hairStylings != null )
+        if ( !hairStylings.isEmpty() )
             for ( Styling styling: hairStylings )
                 fileName.append( "_" ).append( styling.name().toLowerCase() );
         else

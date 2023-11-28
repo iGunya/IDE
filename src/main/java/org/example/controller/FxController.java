@@ -136,12 +136,12 @@ public class FxController {
             createColorButton( HEAD.aliases.get( 0 ) );
             createStyilingButton( HEAD.aliases.get( 0 ) );
         } else {
-            createCurrentLongButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
-            createCurrentLongButton( BRARD.aliases.get( 0 ), BeardSector.CHIN.aliases.get( 0 ) );
-            createCurrentLongButton( BRARD.aliases.get( 0 ), BeardSector.MUSTACHE.aliases.get( 0 ) );
-            createDisiredLongButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
-            createDisiredLongButton( BRARD.aliases.get( 0 ), BeardSector.CHIN.aliases.get( 0 ) );
-            createDisiredLongButton( BRARD.aliases.get( 0 ), BeardSector.MUSTACHE.aliases.get( 0 ) );
+            createCurrentLongButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 1 ) );
+            createCurrentLongButton( BRARD.aliases.get( 0 ), BeardSector.CHIN.aliases.get( 1 ) );
+            createCurrentLongButton( BRARD.aliases.get( 0 ), BeardSector.MUSTACHE.aliases.get( 1 ) );
+            createDisiredLongButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 1 ) );
+            createDisiredLongButton( BRARD.aliases.get( 0 ), BeardSector.CHIN.aliases.get( 1 ) );
+            createDisiredLongButton( BRARD.aliases.get( 0 ), BeardSector.MUSTACHE.aliases.get( 1 ) );
             createColorButton( BRARD.aliases.get( 0 ) );
             createStyilingButton( BRARD.aliases.get( 0 ) );
         }
@@ -203,6 +203,19 @@ public class FxController {
         row.setMinWidth( vBoxButton.getPrefWidth() );
         stepHolder.getLast().command.setView( row );
         vBoxInput.getChildren().add( row );
+
+        boolean allowedNext = true;
+        for ( Node node : vBoxButton.getChildren() ) {
+            if ( node.idProperty().get().startsWith( "current_" ) && !node.isDisable() ) {
+                allowedNext = false;
+            }
+        }
+        if ( allowedNext ) {
+            createNextButton( false );
+            vBoxButton.getChildren().stream().filter( node -> colorStyilingDrying.contains( node.idProperty().get().split( "_" )[0] ) )
+                    .forEach( node -> node.setDisable( false ) );
+        }
+
         confirm.setVisible( false );
     }
 
@@ -242,7 +255,7 @@ public class FxController {
         commandBihaviour.desiredLong( TypeHaircut.typeFrom( id[1] ), id[2], value );
 
         diseredLongButton.setDisable( true );
-        boolean allowedNext = true;
+/*        boolean allowedNext = true;
         for ( Node node : vBoxButton.getChildren() ) {
             if ( node.idProperty().get().startsWith( "disired_" ) && !node.isDisable() ) {
                 allowedNext = false;
@@ -252,7 +265,7 @@ public class FxController {
             createNextButton( false );
             vBoxButton.getChildren().stream().filter( node -> colorStyilingDrying.contains( node.idProperty().get().split( "_" )[0] ) )
                     .forEach( node -> node.setDisable( false ) );
-        }
+        }*/
         vBoxInput.getChildren().remove( vBoxInput.getChildren().size() - 1 );
 
         HBox row = new HBox();
@@ -276,6 +289,7 @@ public class FxController {
 
     private void nextHandler(  ActionEvent event, boolean isHaicut  ) {
         vBoxButton.getChildren().clear();
+        disabeDisiredButton();
         if ( !stackButton.isEmpty() ) {
             vBoxButton.getChildren().add( stackButton.peek() );
             stackButton.pop();
@@ -291,14 +305,16 @@ public class FxController {
 
     private void createColorButton( String typeHaircut ) {
         Button button = new Button( "Цвет волос" );
-        button.setOnAction( this::colorHandler );
+        button.setOnAction( e -> colorHandler( e, typeHaircut )  );
         button.idProperty().set( "color_" + typeHaircut );
         button.setDisable( true );
         button.setMinWidth( vBoxButton.getPrefWidth() );
         vBoxButton.getChildren().add( button );
     }
 
-    private void colorHandler( ActionEvent event ) {
+    private void colorHandler( ActionEvent event, String typeHaircut ) {
+        if ( HEAD == TypeHaircut.typeFrom( typeHaircut ) )
+            disabeDisiredButton();
         Button forButton = ( Button )event.getTarget();
         forButton.setDisable( true );
 
@@ -311,6 +327,15 @@ public class FxController {
         command.setFont( new Font( 18 ) );
         row.getChildren().addAll( command, comboBox );
         vBoxInput.getChildren().add( row );
+    }
+
+    private void disabeDisiredButton() {
+        vBoxButton.getChildren().stream().filter( node ->  node.idProperty().get().startsWith( "disired_" ) )
+                .forEach( node -> node.setDisable( true ) );
+        stateDisired.beardColor = stateBefore.beardColor;
+        for ( Map.Entry<String, HairLong> sectorSize: stateBefore.sectorSize.entrySet() ) {
+            stateDisired.sectorSize.computeIfAbsent( sectorSize.getKey(), v -> sectorSize.getValue() );
+        }
     }
 
     private void inputColor( ActionEvent event, ComboBox<String> comboBox ) {
@@ -340,6 +365,8 @@ public class FxController {
     }
 
     private void styilingHandler( ActionEvent event, String typeHaircut ) {
+        if ( HEAD == TypeHaircut.typeFrom( typeHaircut ) )
+            disabeDisiredButton();
         Button forButton = ( Button )event.getTarget();
         forButton.setDisable( true );
         ObservableList<String> colors = FXCollections.observableList( Arrays.stream( Styling.values() ).map( e -> e.name ).collect( Collectors.toList() ) );

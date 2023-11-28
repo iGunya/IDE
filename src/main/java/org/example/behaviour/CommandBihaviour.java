@@ -47,7 +47,8 @@ public class CommandBihaviour {
         step.command = command;
         step.head.setSector( sector, x );
         stepHolder.addStep( step );
-        stateBefore.sectorSize.put( sector.name(), x);
+        stateBefore.sectorSizeNumber.put( sector.name(), x );
+        stateBefore.sectorSize.put( sector.name(), Utils.getLong( HEAD, x ) );
     }
 
     public void currentLongBeard( BeardSector sector, int x) {
@@ -58,7 +59,8 @@ public class CommandBihaviour {
         step.command = command;
         step.beard.setSector( sector, x );
         stepHolder.addStep( step );
-        stateBefore.sectorSize.put( sector.name(), x);
+        stateBefore.sectorSizeNumber.put( sector.name(), x );
+        stateBefore.sectorSize.put( sector.name(), Utils.getLong( BRARD, x ));
     }
 
     public void desiredLong( TypeHaircut haircut, String sectorSting, int x  ) {
@@ -86,13 +88,13 @@ public class CommandBihaviour {
     }
 
     private void validateDisiredLessThenCurrent( Enum<?> sector, int x ) {
-        Map<String, Integer> sectorSize = stateBefore.sectorSize;
-        assertDisiredLessThenCurrent( sectorSize.get( sector.name() ) > x );
+        Map<String, Integer> sectorSize = stateBefore.sectorSizeNumber;
+        assertDisiredLessThenCurrent( sectorSize.get( sector.name() ) >= x );
     }
 
     private void assertDisiredLessThenCurrent( boolean isLess ) {
         Validate.isTrue( isLess,
-                "Длина волос до стрижки, должна быть больше чем после стрижки" );
+                "Длина волос до стрижки, должна быть больше или равна, чем после стрижки" );
     }
 
     public void hairColor( TypeHaircut haircut, HairColor color ) {

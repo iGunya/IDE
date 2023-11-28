@@ -22,7 +22,7 @@ public class App extends Application {
         Thread.setDefaultUncaughtExceptionHandler(App::showError);
 
         FXMLLoader fxmlLoader = new FXMLLoader( App.class.getResource( "haircut.fxml" ) );
-        Scene scene = new Scene(fxmlLoader.load(), 1050, 900);
+        Scene scene = new Scene(fxmlLoader.load(), 1150, 900);
         stage.setScene(scene);
         stage.setTitle( "Барбер (づ ◕‿◕ )づ" );
         stage.show();
