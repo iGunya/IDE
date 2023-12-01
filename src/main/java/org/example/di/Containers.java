@@ -6,6 +6,10 @@ import org.example.behaviour.StepHolder;
 import org.example.controller.ConfirmController;
 import org.example.state.HaircutBeforeState;
 import org.example.state.HaircutDesiredState;
+import org.example.state.Step;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Containers {
 
@@ -15,6 +19,7 @@ public class Containers {
     private static HaircutBeforeState stateBefore;
     private static Stage stage;
     private static ConfirmController controller;
+    private static final Map<String, Step> disiredSteps = new HashMap<>();
 
     public static CommandBihaviour getCommandBihaviour() {
         if ( commandBihaviour == null )
@@ -54,5 +59,9 @@ public class Containers {
 
     public static void setController( ConfirmController controller ) {
         Containers.controller = controller;
+    }
+
+    public static Map<String, Step> getDisiredSteps() {
+        return disiredSteps;
     }
 }

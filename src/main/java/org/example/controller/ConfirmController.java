@@ -1,28 +1,21 @@
 package org.example.controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
-import org.example.App;
 import org.example.Utils;
 import org.example.behaviour.CommandBihaviour;
 import org.example.behaviour.StepHolder;
 import org.example.di.Containers;
-import org.example.state.CommandConstants;
-import org.example.state.HaircutBeforeState;
-import org.example.state.HaircutDesiredState;
-import org.example.state.Step;
+import org.example.state.*;
 import org.example.state.params.BeardSector;
 import org.example.state.params.HeadSector;
 import org.example.state.params.TypeHaircut;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +28,8 @@ import static org.example.state.params.TypeHaircut.HEAD;
 
 public class ConfirmController {
 
-    private final CommandBihaviour commandBihaviour = Containers.getCommandBihaviour();
-    private final StepHolder stepHolder = Containers.getStepHolder();
     private final HaircutDesiredState stateDisired = Containers.getStateDisired();
-    private final HaircutBeforeState stateBefore = Containers.getStateBefore();
-    private final Stack<Button> stackButton = new Stack<>();
+    private final Map<String, Step> desiredStep = Containers.getDisiredSteps();
 
     @FXML
     private VBox resetVBox;
@@ -106,6 +96,8 @@ public class ConfirmController {
                 stateDisired.sectorSizeNumber.put( BeardSector.sectorFrom( id[1] ).name(), value );
                 stateDisired.sectorSize.put( BeardSector.sectorFrom( id[1] ).name(), Utils.getLong( BRARD, value ) );
             }
+            String papamsOld = desiredStep.get( spinnerId ).command.params.split( " " )[0];
+            desiredStep.get( spinnerId ).command.params = papamsOld + "_" + value.toString();
         }
 
         dialog.close();

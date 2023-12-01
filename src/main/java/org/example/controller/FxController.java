@@ -2,7 +2,6 @@ package org.example.controller;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.sun.rowset.internal.Row;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -12,17 +11,14 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.effect.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,12 +28,14 @@ import org.example.Utils;
 import org.example.behaviour.CommandBihaviour;
 import org.example.behaviour.StepHolder;
 import org.example.di.Containers;
-import org.example.state.*;
+import org.example.state.CommandConstants;
+import org.example.state.HaircutBeforeState;
+import org.example.state.HaircutDesiredState;
+import org.example.state.Step;
 import org.example.state.params.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.example.Utils.createInputBoxWithSpinner;
@@ -51,20 +49,17 @@ public class FxController {
     private final HaircutBeforeState stateBefore = Containers.getStateBefore();
     private final Stack<Button> stackButton = new Stack<>();
 
-    private final Set<String> colorStyilingDrying = ImmutableSet.of( "color", "styiling", "drying" );
-    private final Map<String, Step> disiredSteps = new HashMap<>();
+    private final Set<String> colorStyilingDrying = ImmutableSet.of( "color", "styiling" );
+    private final Map<String, Step> disiredSteps = Containers.getDisiredSteps();
 
     @FXML
     private VBox vBoxButton;
     @FXML
     private VBox vBoxInput;
     @FXML
-    private Button typeHaircut;
-    @FXML
     private Button confirm;
     @FXML
     private Button run;
-
     @FXML
     private Group mirrowImage;
     @FXML
@@ -73,7 +68,6 @@ public class FxController {
     private Group disiredImage;
     @FXML
     private Label disiredLabel;
-
 
     @FXML
     public void typeHaircutHandler() {
@@ -91,20 +85,20 @@ public class FxController {
     }
 
     private void inputTypeHaircut( ActionEvent event, CheckComboBox<String> comboBox ) {
-        ObservableList<String> checkedIndices = comboBox.getCheckModel().getCheckedItems();
-        Validate.isTrue( !checkedIndices.isEmpty(), "Не выбран тип стрижки" );
+        ObservableList<String> checkedIndices = comboBox.getCheckModel().getCheckedItems(); // получаем выбранные параметры
+        Validate.isTrue( !checkedIndices.isEmpty(), "Не выбран тип стрижки" ); // валидируем введенные параметры
         List<TypeHaircut> typeHaircuts = new ArrayList<>();
-        for ( String aliase : checkedIndices ) {
+        for ( String aliase : checkedIndices ) { // формируем из введенных пользователем параметры, внутренние обекты
            typeHaircuts.add( TypeHaircut.typeFrom( aliase ) );
         }
-        commandBihaviour.choseHaircut( typeHaircuts );
+        commandBihaviour.choseHaircut( typeHaircuts ); // обрабатываем выражение
         HBox row = new HBox();
         row.setMinWidth( vBoxButton.getPrefWidth() );
         stepHolder.getLast().command.setView( row );
-        vBoxInput.getChildren().remove( vBoxInput.getChildren().size() - 1 );
-        vBoxInput.getChildren().add( row );
+        vBoxInput.getChildren().remove( vBoxInput.getChildren().size() - 1 ); // удаляем выражение для ввода
+        vBoxInput.getChildren().add( row ); // фиксируем на экране выражение
         confirm.setVisible( false );
-        for ( TypeHaircut typeHaircut : stateDisired.haircuts) {
+        for ( TypeHaircut typeHaircut : stateDisired.haircuts) { // создаем следующие кнопки
             createForButton( typeHaircut );
         }
     }
@@ -286,29 +280,32 @@ public class FxController {
     }
 
     private void createColorButton( String typeHaircut ) {
-        Button button = new Button( "Цвет волос" );
-        button.setOnAction( e -> colorHandler( e, typeHaircut )  );
-        button.idProperty().set( "color_" + typeHaircut );
-        button.setDisable( true );
-        button.setMinWidth( vBoxButton.getPrefWidth() );
-        vBoxButton.getChildren().add( button );
+        Button button = new Button( CommandConstants.HAIR_COLOR.stingCommand ); // создаем кнопуку с названием команды
+        button.setOnAction( e -> colorHandler( e, typeHaircut )  ); // добавляем обработчик нажатия
+        button.idProperty().set( "color_" + typeHaircut ); // добавляем id кнопки для возможности отличить ее от других
+        button.setDisable( true ); // сразу делаем ее активной
+        button.setMinWidth( vBoxButton.getPrefWidth() ); // устанавливаем ширину по всему блоку отображкния
+        vBoxButton.getChildren().add( button ); // добавляем кнопку на экран
     }
 
-    private void colorHandler( ActionEvent event, String typeHaircut ) {
+    private void colorHandler( ActionEvent event, String typeHaircut ) { // обработка нажатия на кнопку
         if ( HEAD == TypeHaircut.typeFrom( typeHaircut ) )
             disabeDisiredButton();
         Button forButton = ( Button )event.getTarget();
-        forButton.setDisable( true );
+        forButton.setDisable( true ); // делаем кнопку неактивной
 
-        ObservableList<String> colors = FXCollections.observableList( Arrays.stream( HairColor.values() ).map( e -> e.name ).collect( Collectors.toList() )  );
-        ComboBox<String> comboBox = new ComboBox<>( colors );
-        confirm.setOnAction( e -> inputColor( event, comboBox ) );
-        confirm.setVisible( true );
-        HBox row = new HBox();
-        Label command = new Label( "Цвет волос" );
+        ObservableList<String> colors = // формируем список возможных параметров для выбора цвета
+                FXCollections.observableList( Arrays.stream( HairColor.values() )
+                        .map( e -> e.name )
+                        .collect( Collectors.toList() )  );
+        ComboBox<String> comboBox = new ComboBox<>( colors ); // создаем контейнер для ввода значений
+        confirm.setOnAction( e -> inputColor( event, comboBox ) ); // весим обработчик подтвержения выбора цвета
+        confirm.setVisible( true ); // делаем кнопку подтверждения активной
+        HBox row = new HBox(); // создаем контейнер для отображения команды и подля для ввода параметров
+        Label command = new Label( CommandConstants.HAIR_COLOR.stingCommand );
         command.setFont( new Font( 18 ) );
-        row.getChildren().addAll( command, comboBox );
-        vBoxInput.getChildren().add( row );
+        row.getChildren().addAll( command, comboBox ); // заполняем контейнер содежимым
+        vBoxInput.getChildren().add( row ); // добавляем контейнер для отображения на экран
     }
 
     private void disabeDisiredButton() {
@@ -320,20 +317,21 @@ public class FxController {
     }
 
     private void inputColor( ActionEvent event, ComboBox<String> comboBox ) {
-        HairColor color = HairColor.colorFrom( comboBox.getValue() );
+        HairColor color = HairColor.colorFrom( comboBox.getValue() ); // валидация введенного цвета
         Validate.notNull( color, "Не выбран цвет волос" );
 
         Button diseredLongButton = ( Button )event.getTarget();
         String[] id = diseredLongButton.idProperty().get().split( "_" );
-        commandBihaviour.hairColor( TypeHaircut.typeFrom( id[1] ), color );
-        diseredLongButton.setDisable( true );
+        commandBihaviour.hairColor( TypeHaircut.typeFrom( id[1] ), color ); // обработка введенной команды
+        diseredLongButton.setDisable( true ); // деактивация нажатия кнопки
 
-        HBox row = new HBox();
+        HBox row = new HBox(); // создаем контейнер для фиксации команды с параметрами введёнными пользователем
         row.setMinWidth( vBoxButton.getPrefWidth() );
-        stepHolder.getLast().command.setView( row );
+        stepHolder.getLast().command.setView( row ); // прихраниваем контейнер для дальнейших манипуляций
+        // команду с полем для ввода параметров удаляем с экрана
         vBoxInput.getChildren().remove( vBoxInput.getChildren().size() - 1 );
-        vBoxInput.getChildren().add( row );
-        confirm.setVisible( false );
+        vBoxInput.getChildren().add( row ); // зафиксированную команду добавляем на экран
+        confirm.setVisible( false ); // выключаем кнопку для подтверждения введенных парметров
     }
 
     private void createStyilingButton( String typeHaircut ) {
@@ -345,15 +343,16 @@ public class FxController {
         vBoxButton.getChildren().add( button );
     }
 
-    private void styilingHandler( ActionEvent event, String typeHaircut ) {
-        if ( HEAD == TypeHaircut.typeFrom( typeHaircut ) )
+    private void styilingHandler( ActionEvent event, String typeHaircutString ) {
+        TypeHaircut typeHaircut = typeFrom( typeHaircutString );
+        if ( HEAD == typeHaircut )
             disabeDisiredButton();
         Button forButton = ( Button )event.getTarget();
         forButton.setDisable( true );
-        ObservableList<String> colors = FXCollections.observableList( Arrays.stream( Styling.values() ).map( e -> e.name ).collect( Collectors.toList() ) );
+        ObservableList<String> styilings = createListStylingFor( typeHaircut );
 
-        CheckComboBox<String> comboBox = new CheckComboBox<>( colors );
-        confirm.setOnAction( e -> stylingColor( event, comboBox ) );
+        CheckComboBox<String> comboBox = new CheckComboBox<>( styilings );
+        confirm.setOnAction( e -> stylingHandler( event, comboBox ) );
         confirm.setVisible( true );
         FlowPane row = new FlowPane();
         Label command = new Label( "Укладка включает" );
@@ -362,7 +361,19 @@ public class FxController {
         vBoxInput.getChildren().add( row );
     }
 
-    private void stylingColor( ActionEvent event, CheckComboBox<String> comboBox ) {
+    private ObservableList<String> createListStylingFor( TypeHaircut typeHaircut ) {
+        if (  typeHaircut == HEAD ) {
+            HairLong hairLong = stateDisired.sectorSize.get( HeadSector.TOP.name() );
+            return FXCollections.observableArrayList( hairLong.hairSectorParams.get( HEAD )
+                    .stylings.stream().map( e -> e.name ).collect( Collectors.toList() ) );
+        } else {
+            HairLong hairLong = stateDisired.sectorSize.get( BeardSector.MUSTACHE.name() );
+            return FXCollections.observableArrayList( hairLong.hairSectorParams.get( BRARD )
+                    .stylings.stream().map( e -> e.name ).collect( Collectors.toList() ) );
+        }
+    }
+
+    private void stylingHandler( ActionEvent event, CheckComboBox<String> comboBox ) {
         ObservableList<String> checkedIndices = comboBox.getCheckModel().getCheckedItems();
         Validate.isTrue( !checkedIndices.isEmpty(), "Не выбрана укладка" );
         commandBihaviour.hairStyling( checkedIndices.stream().map( Styling::styingFrom ).collect( Collectors.toList()) );
@@ -423,20 +434,20 @@ public class FxController {
 
     private void createButtonsAfterHaircut( TypeHaircut typeHaircut ) {
         if ( HEAD == typeHaircut ) {
-            createWahingButton( HEAD.aliases.get( 0 ), HeadSector.WHISKY.aliases.get( 0 ) );
             createHaircutSectorButton( HEAD.aliases.get( 0 ), HeadSector.WHISKY.aliases.get( 0 ) );
             createHaircutSectorButton( HEAD.aliases.get( 0 ), HeadSector.BACK.aliases.get( 0 ) );
             createHaircutSectorButton( HEAD.aliases.get( 0 ), HeadSector.TOP.aliases.get( 0 ) );
+            createWahingButton( HEAD.aliases.get( 0 ), HeadSector.WHISKY.aliases.get( 0 ) );
             createDryingButton( HEAD.aliases.get( 0 ), HeadSector.WHISKY.aliases.get( 0 ) );
             if ( stateDisired.hairColor != HairColor.NO_CHANGE )
                 creatColorProcessButton( HEAD.aliases.get( 0 ) );
             if ( stateDisired.hairStylings != null && !stateDisired.hairStylings.isEmpty() )
                 createEndStyilingButton( HEAD.aliases.get( 0 ), HeadSector.WHISKY.aliases.get( 0 ) );
         } else {
-            createWahingButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
             createHaircutSectorButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
             createHaircutSectorButton( BRARD.aliases.get( 0 ), BeardSector.CHIN.aliases.get( 0 ) );
             createHaircutSectorButton( BRARD.aliases.get( 0 ), BeardSector.MUSTACHE.aliases.get( 0 ) );
+            createWahingButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
             if ( stateDisired.beardColor != HairColor.NO_CHANGE )
                 creatColorProcessButton( BRARD.aliases.get( 0 ) );
             createDryingButton( BRARD.aliases.get( 0 ), BeardSector.CHEEKS.aliases.get( 0 ) );
@@ -455,6 +466,8 @@ public class FxController {
     }
 
     private void colorProcessHandler( ActionEvent event, String type  ) {
+        Button colorProcess = ( Button )event.getTarget();
+        colorProcess.setDisable( true );
         commandBihaviour.colorProcess( TypeHaircut.typeFrom( type ) );
         HBox row = new HBox();
         row.setMinWidth( vBoxButton.getPrefWidth() );
@@ -476,6 +489,8 @@ public class FxController {
         row.setMinWidth( vBoxButton.getPrefWidth() );
         stepHolder.getLast().command.setView( row );
         vBoxInput.getChildren().add( row );
+        vBoxButton.getChildren().stream().filter( e -> e.idProperty().get().startsWith( "drying" ) )
+                .forEach( e -> e.setDisable( false ) );
     }
 
     private void createHaircutSectorButton( String type, String sector ) {
