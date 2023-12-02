@@ -48,4 +48,8 @@ public class Command {
             view.setStyle( null );
         }
     }
+
+    public String getTextCommand() {
+        return ( ( Label )view.getChildren().get( 0 )).getText();
+    }
 }

@@ -6,6 +6,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.example.Utils;
 import org.example.behaviour.CommandBihaviour;
@@ -13,13 +14,11 @@ import org.example.behaviour.StepHolder;
 import org.example.di.Containers;
 import org.example.state.*;
 import org.example.state.params.BeardSector;
+import org.example.state.params.HairLong;
 import org.example.state.params.HeadSector;
 import org.example.state.params.TypeHaircut;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.example.Utils.createInputBoxWithSpinner;
@@ -69,15 +68,15 @@ public class ConfirmController {
         if ( stateDisired.haircuts.contains( BRARD ) ) {
             if ( disiredSteps.containsKey( BRARD.aliases.get( 0 ) + "_" + BeardSector.CHIN.aliases.get( 1 ) ) )
                 userInput.add( createInputBoxWithSpinner( BRARD.aliases.get( 0 ),
-                        BeardSector.CHIN.aliases.get( 0 ), CommandConstants.DESIRED_LONG,
+                        BeardSector.CHIN.aliases.get( 1 ), CommandConstants.DESIRED_LONG,
                         sectorSizeNumber.get( BeardSector.CHIN.name() ) ) );
             if ( disiredSteps.containsKey( BRARD.aliases.get( 0 ) + "_" + BeardSector.CHEEKS.aliases.get( 1 ) ) )
                 userInput.add( createInputBoxWithSpinner( BRARD.aliases.get( 0 ),
-                        BeardSector.CHEEKS.aliases.get( 0 ), CommandConstants.DESIRED_LONG,
+                        BeardSector.CHEEKS.aliases.get( 1 ), CommandConstants.DESIRED_LONG,
                         sectorSizeNumber.get( BeardSector.CHEEKS.name() ) ) );
             if ( disiredSteps.containsKey( BRARD.aliases.get( 0 ) + "_" + BeardSector.MUSTACHE.aliases.get( 1 ) ) )
                 userInput.add( createInputBoxWithSpinner( BRARD.aliases.get( 0 ),
-                        BeardSector.MUSTACHE.aliases.get( 0 ), CommandConstants.DESIRED_LONG,
+                        BeardSector.MUSTACHE.aliases.get( 1 ), CommandConstants.DESIRED_LONG,
                         sectorSizeNumber.get( BeardSector.MUSTACHE.name() )) );
         }
 
@@ -85,21 +84,53 @@ public class ConfirmController {
     }
 
     private void setNewValues( List<Pair<Spinner<Integer>, HBox>> userInput ) {
+        validateLongHead( userInput );
+
         for ( Pair<Spinner<Integer>, HBox> input: userInput ) {
             Integer value = input.getKey().getValue();
             String spinnerId = input.getKey().idProperty().get();
             String[] id = spinnerId.split( "_" );
             if ( TypeHaircut.typeFrom( id[0] ) == HEAD ) {
-                stateDisired.sectorSizeNumber.put( HeadSector.sectorFrom( id[1] ).name(), value );
-                stateDisired.sectorSize.put( HeadSector.sectorFrom( id[1] ).name(), Utils.getLong( HEAD, value ) );
+                HeadSector headSector = HeadSector.sectorFrom( id[1] );
+                HairLong hairSectorLong = Utils.getLong( HEAD, value );
+                Utils.validateDisiredLessThenCurrent( headSector, value );
+                Validate.isTrue( hairSectorLong.hairSectorParams.get( HEAD ).stylings.containsAll( stateDisired.hairStylings ),
+                         "Для новой длинны невозможны желаемые параметры укладки" );
+                stateDisired.sectorSizeNumber.put( headSector.name(), value );
+                stateDisired.sectorSize.put( headSector.name(), hairSectorLong );
             } else {
-                stateDisired.sectorSizeNumber.put( BeardSector.sectorFrom( id[1] ).name(), value );
-                stateDisired.sectorSize.put( BeardSector.sectorFrom( id[1] ).name(), Utils.getLong( BRARD, value ) );
+                BeardSector headSector = BeardSector.sectorFrom( id[1] );
+                HairLong hairSectorLong = Utils.getLong( BRARD, value );
+                Utils.validateDisiredLessThenCurrent( headSector, value );
+                if ( headSector == BeardSector.MUSTACHE )
+                    Validate.isTrue( hairSectorLong.hairSectorParams.get( BRARD ).stylings.containsAll( stateDisired.hairStylings ),
+                            "Для новой длинны невозможны желаемые параметры укладки" );
+                stateDisired.sectorSizeNumber.put( headSector.name(), value );
+                stateDisired.sectorSize.put( headSector.name(), hairSectorLong );
             }
             String papamsOld = desiredStep.get( spinnerId ).command.params.split( " " )[0];
             desiredStep.get( spinnerId ).command.params = papamsOld + "_" + value.toString();
         }
 
         dialog.close();
+    }
+
+    private void validateLongHead( List<Pair<Spinner<Integer>, HBox>> userInput ) {
+        Map<String, Integer> topAndWiskiLong = new HashMap<>();
+        for ( Pair<Spinner<Integer>, HBox> input : userInput ){
+            Integer value = input.getKey().getValue();
+            String spinnerId = input.getKey().idProperty().get();
+            String[] id = spinnerId.split( "_" );
+            if ( TypeHaircut.typeFrom( id[0] ) == HEAD ) {
+                HeadSector headSector = HeadSector.sectorFrom( id[1] );
+                if ( headSector == HeadSector.TOP )
+                    topAndWiskiLong.put( HeadSector.TOP.name(), value );
+                if ( headSector == HeadSector.WHISKY )
+                    topAndWiskiLong.put( HeadSector.WHISKY.name(), value );
+            }
+        }
+        if ( topAndWiskiLong.size() == 2 )
+            Validate.isTrue( topAndWiskiLong.get( HeadSector.TOP.name() ) >= topAndWiskiLong.get( HeadSector.WHISKY.name() ),
+                    "Длина волос верха дожна быть больше или равна вискам" );
     }
 }

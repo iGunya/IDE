@@ -11,12 +11,14 @@ import static org.example.state.params.TypeHaircut.BRARD;
 import static org.example.state.params.TypeHaircut.HEAD;
 
 public enum HairLong {
-    SHORT( ImmutableMap.of( HEAD, new LongParams( ImmutableSet.of( LEFT, RIGHT, CURLS ), 0, 50 ) ,
-                            BRARD, new LongParams( ImmutableSet.of(), 0, 10 ) ) ),
+    NON ( ImmutableMap.of( HEAD, new LongParams( ImmutableSet.of(), 0, 0 ),
+                           BRARD, new LongParams( ImmutableSet.of(), 0, 0 ) ) ),
+    SHORT( ImmutableMap.of( HEAD, new LongParams( ImmutableSet.of( LEFT, RIGHT, CURLS ), 1, 50 ) ,
+                            BRARD, new LongParams( ImmutableSet.of(), 1, 10 ) ) ),
     MIDLE( ImmutableMap.of( HEAD, new LongParams( ImmutableSet.of( LEFT, RIGHT, CURLS, PARTING, DREADLOCKS), 51, 150 ),
-                            BRARD, new LongParams( ImmutableSet.of( MUSTACHE ) , 11, 50 ) ) ),
+                            BRARD, new LongParams( ImmutableSet.of( MUSTACHE ), 11, 50 ) ) ),
     LONG( ImmutableMap.of( HEAD, new LongParams( ImmutableSet.of( DREADLOCKS, PARTING, CURLS ), 151, 500 ),
-                           BRARD, new LongParams( ImmutableSet.of( MUSTACHE ) , 51, 150) ) );
+                           BRARD, new LongParams( ImmutableSet.of( MUSTACHE ), 51, 150) ) );
 
     public final Map<TypeHaircut, LongParams> hairSectorParams;
 

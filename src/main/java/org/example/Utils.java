@@ -10,13 +10,17 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.example.behaviour.StepHolder;
 import org.example.di.Containers;
 import org.example.state.CommandConstants;
 import org.example.state.Step;
 import org.example.state.params.HairLong;
+import org.example.state.params.HeadSector;
 import org.example.state.params.TypeHaircut;
+
+import java.util.Map;
 
 import static org.example.state.params.TypeHaircut.HEAD;
 
@@ -53,7 +57,7 @@ public class Utils {
         spinner.idProperty().set( type + "_" + sector );
         HBox row = new HBox();
         String[] currentLong = command.stingCommand.split( "%." );
-        Label commandStart = new Label( currentLong[0] + " " + sector );
+        Label commandStart = new Label( currentLong[0] + " " + sector + " " );
         commandStart.setFont( new Font( 18 ) );
         Label commandEnd = new Label( currentLong[1] );
         commandEnd.setFont( new Font( 18 ) );
@@ -68,6 +72,7 @@ public class Utils {
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, def );
         spinner.setValueFactory(valueFactory);
         spinner.setEditable( true );
+        spinner.setPrefWidth( 100 );
         return spinner;
     }
 
@@ -81,5 +86,31 @@ public class Utils {
         cur.head.top = prev.head.top;
         cur.head.whisky = prev.head.whisky;
         cur.head.back = prev.head.back;
+    }
+
+    public static void validateDisiredLessThenCurrent( Enum<?> sector, int x ) {
+        Map<String, Integer> sectorSize = Containers.getStateBefore().sectorSizeNumber;
+        Integer size = sectorSize.get( sector.name() );
+        assertDisiredLessThenCurrent( size >= x );
+    }
+
+    private static void assertDisiredLessThenCurrent( boolean isLess ) {
+        Validate.isTrue( isLess,
+                "Длина волос до стрижки, должна быть больше или равна, чем после стрижки" );
+    }
+
+    public static void validateTopAndWiskyLong( Enum<?> sector, int x ) {
+        Map<String, Integer> disiredSize = Containers.getStateDisired().sectorSizeNumber;
+        if( sector.name().equals( HeadSector.TOP.name() ) ) {
+            Integer sizeWhisky = disiredSize.get( HeadSector.WHISKY.name() );
+            if ( sizeWhisky != null )
+                Validate.isTrue( sizeWhisky <= x,
+                        "Длина волос верха дожна быть больше или равна вискам" );
+        } else if ( sector.name().equals( HeadSector.WHISKY.name() ) ) {
+            Integer sizeTop = disiredSize.get( HeadSector.TOP.name() );
+            if ( sizeTop != null )
+                Validate.isTrue( sizeTop >= x,
+                        "Длина волос верха дожна быть больше или равна вискам" );
+        }
     }
 }

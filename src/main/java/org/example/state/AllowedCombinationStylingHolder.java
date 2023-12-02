@@ -19,7 +19,7 @@ public class AllowedCombinationStylingHolder {
                              DREADLOCKS, ImmutableList.of(),
                              MUSTACHE, ImmutableList.of() );
 
-    public List<Styling> getCombination( Styling styling ) {
+    public static List<Styling> getCombination( Styling styling ) {
         return allowedCombination.get( styling );
     }
 }

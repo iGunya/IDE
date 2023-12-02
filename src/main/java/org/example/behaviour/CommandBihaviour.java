@@ -70,14 +70,16 @@ public class CommandBihaviour {
         switch ( haircut ) {
             case HEAD: {
                 HeadSector sector = HeadSector.sectorFrom( sectorSting );
-                validateDisiredLessThenCurrent( sector, x);
+                Utils.validateDisiredLessThenCurrent( sector, x);
+                Utils.validateTopAndWiskyLong( sector, x);
                 stateDisired.sectorSizeNumber.put( HeadSector.sectorFrom( sectorSting ).name(), x );
                 stateDisired.sectorSize.put( HeadSector.sectorFrom( sectorSting ).name(), Utils.getLong( HEAD, x ) );
                 break;
             }
             default: {
                 BeardSector sector = BeardSector.sectorFrom( sectorSting );
-                validateDisiredLessThenCurrent( sector, x);
+                Utils.validateDisiredLessThenCurrent( sector, x);
+                Utils.validateTopAndWiskyLong( sector, x);
                 stateDisired.sectorSizeNumber.put( BeardSector.sectorFrom( sectorSting ).name(), x );
                 stateDisired.sectorSize.put( BeardSector.sectorFrom( sectorSting ).name(), Utils.getLong( BRARD, x ) );
             }
@@ -89,15 +91,7 @@ public class CommandBihaviour {
         stepHolder.addStep( step );
     }
 
-    private void validateDisiredLessThenCurrent( Enum<?> sector, int x ) {
-        Map<String, Integer> sectorSize = stateBefore.sectorSizeNumber;
-        assertDisiredLessThenCurrent( sectorSize.get( sector.name() ) >= x );
-    }
 
-    private void assertDisiredLessThenCurrent( boolean isLess ) {
-        Validate.isTrue( isLess,
-                "Длина волос до стрижки, должна быть больше или равна, чем после стрижки" );
-    }
 
     public void hairColor( TypeHaircut haircut, HairColor color ) {
         Step step = new Step();

@@ -45,7 +45,8 @@ public class HaircutDesiredState {
             return null;
         StringBuilder fileName = new StringBuilder( "black" );
         fileName.append( "_" ).append( sectorSize.get( TOP.name() ).name().toLowerCase() ).append( "_top" );
-        fileName.append( "_" ).append( sectorSize.get( WHISKY.name() ).name().toLowerCase() ).append( "_wisky" );
+        HairLong whiskyLong = sectorSize.get( WHISKY.name() ) == HairLong.NON ? HairLong.SHORT : sectorSize.get( WHISKY.name() );
+        fileName.append( "_" ).append( whiskyLong.name().toLowerCase() ).append( "_wisky" );
         if ( !hairStylings.isEmpty() )
             for ( Styling styling: hairStylings )
                 fileName.append( "_" ).append( styling.name().toLowerCase() );

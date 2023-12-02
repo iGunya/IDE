@@ -7,6 +7,7 @@ import org.example.state.params.*;
 
 import java.util.List;
 
+import static org.example.state.params.HeadSector.WHISKY;
 import static org.example.state.params.TypeHaircut.*;
 
 public class Head {
@@ -31,7 +32,7 @@ public class Head {
                 break;
             }
             default: {
-                whisky = size;
+                whisky = size == HairLong.NON ? HairLong.SHORT : size;
                 break;
             }
         }
