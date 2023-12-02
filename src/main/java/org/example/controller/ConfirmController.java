@@ -103,7 +103,7 @@ public class ConfirmController {
                 HairLong hairSectorLong = Utils.getLong( BRARD, value );
                 Utils.validateDisiredLessThenCurrent( headSector, value );
                 if ( headSector == BeardSector.MUSTACHE )
-                    Validate.isTrue( hairSectorLong.hairSectorParams.get( BRARD ).stylings.containsAll( stateDisired.hairStylings ),
+                    Validate.isTrue( hairSectorLong.hairSectorParams.get( BRARD ).stylings.containsAll( stateDisired.beardStylings ),
                             "Для новой длинны невозможны желаемые параметры укладки" );
                 stateDisired.sectorSizeNumber.put( headSector.name(), value );
                 stateDisired.sectorSize.put( headSector.name(), hairSectorLong );
